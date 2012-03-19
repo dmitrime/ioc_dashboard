@@ -1,0 +1,51 @@
+/*
+ * page.css - Basic page layout and style.
+ *
+ */
+
+body {
+    font-family: 'Georgia', serif;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+}
+
+div.main {
+    width: 940px;
+    margin: 30px auto 0;
+}
+
+div.mainwrap {
+    width: 100%;
+    float: left;
+    border: 1px dotted;
+}
+
+div.items {
+    padding: 0 50px;
+    border: 1px dotted;
+}
+
+div.itemswrap {
+    margin-left: 230px;
+    border: blue dashed;
+}
+
+div.filterbarwrap {
+    padding: 20px 10px;
+    border: red solid;
+}
+
+div.filterbar {
+    width: 220px;
+    float: left;
+    margin-left 220px;
+    font-size: 14px;
+    line-height: 1.5;
+    border: solid;
+}
+
+div.cleared {
+    clear: both;
+}
+

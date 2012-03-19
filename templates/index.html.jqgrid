@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>My First Grid</title>
+ 
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/smoothness/jquery-ui-1.8.18.custom.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/ui.jqgrid.css") }} />
+ 
+<script type=text/javascript src="{{url_for('static', filename='js/jquery-1.5.2.min.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/i18n/grid.locale-en.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/jquery.jqGrid.min.js') }}"></script>
+<script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+<script type="text/javascript">
+$(function(){ 
+  $("#list").jqGrid({
+    url:$SCRIPT_ROOT + '/_get_iocs',
+    mtype: 'GET',
+    datatype: 'json',
+    colNames:['Id','Title'],
+    colModel :[ 
+      {name:'id', index:'id', width:55}, 
+      {name:'title', index:'title', width:320, sortable:false} 
+    ],
+    pager: '#pager',
+    rowNum:2,
+    rowList:[1,2,10],
+    sortname: 'id',
+    sortorder: 'desc',
+    viewrecords: true,
+    gridview: true,
+    caption: 'My first grid'
+  }); 
+}); 
+</script>
+</head>
+
+<body>
+<table id="list"><tr><td/></tr></table> 
+<div id="pager"></div> 
+</body>
+
+</html>
+
