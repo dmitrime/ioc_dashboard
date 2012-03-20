@@ -4,12 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Data tables</title>
  
-<!--<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/smoothness/jquery-ui-1.8.18.custom.css") }} />
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/demo_table.css") }} />
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/demo_page.css") }} />
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/demo_table_jui.css") }} />
--->
-
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap.min.css") }} />
 <style type="text/css">
     body {
@@ -19,11 +13,14 @@
     .sidebar-nav {
         padding: 9px 0;
     }
-    .main-container {
+    div.main-container {
         margin-left: auto;
         margin-right: auto;
         width: 740px;
         float: left;
+    }
+    div.switch {
+        float: right;
     }
 </style>
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-responsive.min.css") }} />
@@ -101,15 +98,20 @@
 </script>
 <script type="text/javascript" charset="utf-8">
     /* Table initialisation */
-    $(document).ready(function() {
+    $(function() {
             $('#tg_results').dataTable( {
                 "bProcessing": true,
                 "bServerSide": true,
-                "sAjaxSource": $SCRIPT_ROOT + "/_get_iocs",
-                "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+                "sAjaxSource": $SCRIPT_ROOT + "/_get_host_binaries",
+                "sDom": "<'row-fluid'<'span6'l><'span6'<'switch'>>r>t<'row-fluid'<'span6'i><'span6'p>>",
                 "sPaginationType": "bootstrap",
                 "oLanguage": {"sLengthMenu": "_MENU_ records per page"}
                 } );
+
+            var b_ioc = $('<button class="btn">ioc</button>');
+            var b_host = $('<button class="btn">host</button>');
+            b_ioc.appendTo('div.span6 > div.switch');
+            b_host.appendTo('div.span6 > div.switch');
             } );
 </script>
 </body>
