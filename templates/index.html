@@ -20,7 +20,7 @@
         padding: 9px 0;
     }
 </style>
-<!--<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-responsive.min.css") }} />-->
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-responsive.min.css") }} />
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-datatables.css") }} />
 </head>
 
@@ -61,21 +61,19 @@
                 </div><!--/.well -->
             </div><!--/span-->
             <div class="span9">
-                <div class="hero-unit">
-                    <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="tg_results">
-                        <thead>
-                            <tr>
-                                <th width="25%">ID</th>
-                                <th width="75%">Title</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="tg_results">
+                    <thead>
                         <tr>
-                            <td colspan="2" class="dataTables_empty">Loading data from server</td>
+                            <th width="25%">ID</th>
+                            <th width="75%">Title</th>
                         </tr>
-                        </tbody>
-                    </table>
-                </div>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td colspan="2" class="dataTables_empty">Loading data from server</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div><!--/span-->
         </div><!--/row-->
         <footer>
@@ -99,11 +97,10 @@
             $('#tg_results').dataTable( {
                 "bProcessing": true,
                 "bServerSide": true,
-                "bPaginate": "bootstrap",
-                "sPaginationType": "full_numbers",
-                "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-                "oLanguage": {"sLengthMenu": "_MENU_ records per page"},
-                "sAjaxSource": $SCRIPT_ROOT + "/_get_iocs"
+                "sAjaxSource": $SCRIPT_ROOT + "/_get_iocs",
+                "sDom": "<'row'<'span3'l><'span3 offset4'f>r>t<'row'<'span3'i><'span3 offset4'p>>",
+                "sPaginationType": "bootstrap",
+                "oLanguage": {"sLengthMenu": "_MENU_ records per page"}
                 } );
             } );
 </script>
