@@ -20,6 +20,7 @@
         float: left;
     }
     div.switch {
+        margin-bottom: 10px;
         float: right;
     }
 </style>
@@ -51,20 +52,50 @@
             <div class="span2">
                 <div class="well sidebar-nav">
                     <ul class="nav nav-list">
-                        <li class="nav-header">Sidebar</li>
+                        <li class="nav-header">Execution time</li>
                         <li class="active"><a href="#">Link</a></li>
                         <li><a href="#">Link</a></li>
+
+                        <li class="nav-header">IOCs</li>
+                        <li><div class="btn-group">
+                            <button class="btn dropdown-toggle" data-toggle="dropdown">
+                                Select IOCs
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>Action1</li>
+                            </ul>
+                            </div></li>
+
+                        <li class="nav-header">Hosts</li>
+                        <li><div class="btn-group open">
+                            <button class="btn dropdown-toggle" data-toggle="dropdown">
+                                Select Hosts
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>Action1</li>
+                                <li>Action1</li>
+                            </ul>
+                            </div>
+                        </li>
+
+                        <li class="nav-header">Category</li>
                         <li><a href="#">Link</a></li>
+                        <li class="nav-header">Severity</li>
                         <li><a href="#">Link</a></li>
-                        <li class="nav-header">Sidebar</li>
-                        <li><a href="#">Link</a></li>
-                        <li class="nav-header">Sidebar</li>
+                        <li class="nav-header">Confidence</li>
                         <li><a href="#">Link</a></li>
                     </ul>
                 </div><!--/.well -->
             </div><!--/span-->
             <div class="span10">
                 <div class="main-container">
+                    <div class="switch btn-group">
+                        <label>Group by</label>
+                        <button class="btn btn-primary" id="ioc-btn">IOC</button>
+                        <button class="btn" id="host-btn">Host</button>
+                    </div>
                     <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="tg_results">
                         <thead>
                             <tr>
@@ -98,21 +129,41 @@
 </script>
 <script type="text/javascript" charset="utf-8">
     /* Table initialisation */
+    var state = 'ioc';
+    var source_iocs = $SCRIPT_ROOT + "/_get_iocs";
+    var source_hosts = $SCRIPT_ROOT + "/_get_host_binaries";
+    var loadDataTable = function(ajaxSource) {
+    $('#tg_results').dataTable( {
+            "bProcessing": true,
+            "bServerSide": true,
+            "bDestroy": true,
+            "sAjaxSource": ajaxSource,
+            "sDom": "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>",
+            "sPaginationType": "bootstrap",
+            "oLanguage": {"sLengthMenu": "_MENU_ records per page"}
+            });
+    }
     $(function() {
-            $('#tg_results').dataTable( {
-                "bProcessing": true,
-                "bServerSide": true,
-                "sAjaxSource": $SCRIPT_ROOT + "/_get_host_binaries",
-                "sDom": "<'row-fluid'<'span6'l><'span6'<'switch'>>r>t<'row-fluid'<'span6'i><'span6'p>>",
-                "sPaginationType": "bootstrap",
-                "oLanguage": {"sLengthMenu": "_MENU_ records per page"}
-                } );
-
-            var b_ioc = $('<button class="btn">ioc</button>');
-            var b_host = $('<button class="btn">host</button>');
-            b_ioc.appendTo('div.span6 > div.switch');
-            b_host.appendTo('div.span6 > div.switch');
-            } );
+        // load ioc source first time
+        loadDataTable(source_iocs); 
+        // add ioc and host button handlers
+        $('#ioc-btn').click(function () {
+            if (state == 'host') {
+              state = 'ioc';
+              loadDataTable(source_iocs);
+              $(this).addClass('btn-primary');
+              $('#host-btn').removeClass('btn-primary');
+              }
+        });
+        $('#host-btn').click(function () {
+            if (state == 'ioc') {
+              state = 'host';
+              loadDataTable(source_hosts);
+              $(this).addClass('btn-primary');
+              $('#ioc-btn').removeClass('btn-primary');
+              }
+        });
+    } );
 </script>
 </body>
 
