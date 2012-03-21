@@ -86,23 +86,39 @@
 
                         <li class="nav-header">Category</li>
                             <li>
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-01-01" id="id20111"/>Category 1</label> 
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-02-01" id="id20112"/>Category 2</label> 
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-03-01" id="id20113"/>Category 3</label> 
+                            <label class="checkbox"><input type="checkbox" name="category[]" value="1" id="id20111"/>Category 1</label> 
+                            <label class="checkbox"><input type="checkbox" name="category[]" value="2" id="id20112"/>Category 2</label> 
+                            <label class="checkbox"><input type="checkbox" name="category[]" value="3" id="id20113"/>Category 3</label> 
                             </li>
 
                         <li class="nav-header">Severity</li>
                             <li>
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-01-01" id="id20111"/>Severity 1</label> 
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-02-01" id="id20112"/>Severity 2</label> 
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-03-01" id="id20113"/>Severity 3</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="0" />0</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="10" />10</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="20" />20</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="30" />30</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="40" />40</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="50" />50</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="60" />60</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="70" />70</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="80" />80</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="90" />90</label> 
+                            <label class="checkbox"><input type="checkbox" name="severity[]" value="100"/>100</label> 
                             </li>
 
                         <li class="nav-header">Confidence</li>
                             <li>
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-01-01" id="id20111"/>Confidence 1</label> 
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-02-01" id="id20112"/>Confidence 2</label> 
-                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-03-01" id="id20113"/>Confidence 3</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="0" />0</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="10" />10</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="20" />20</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="30" />30</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="40" />40</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="50" />50</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="60" />60</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="70" />70</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="80" />80</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="90" />90</label> 
+                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="100"/>100</label> 
                             </li>
 
                     </ul>
@@ -118,8 +134,8 @@
                     <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="tg_results">
                         <thead>
                             <tr>
-                                <th width="25%">ID</th>
                                 <th width="75%">Title</th>
+                                <th width="25%">Sum</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -183,6 +199,10 @@
               $('#ioc-btn').removeClass('btn-primary disabled');
               }
         });
+        $.getJSON($SCRIPT_ROOT + "/_populate_iocs",
+                  function (data) {
+                      alert(data);
+                  });
     } );
     $(function() {
         $("#exec_date").datepicker({ maxDate: "+0D" });
