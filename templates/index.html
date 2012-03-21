@@ -9,6 +9,7 @@
     body {
         padding-top: 60px;
         padding-bottom: 40px;
+        background: #f5f5f5;
     }
     .sidebar-nav {
         padding: 9px 0;
@@ -26,6 +27,7 @@
 </style>
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-responsive.min.css") }} />
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-datatables.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/flick/jquery-ui-1.8.18.datepicker.css") }} />
 </head>
 
 <body>
@@ -53,8 +55,7 @@
                 <div class="well sidebar-nav">
                     <ul class="nav nav-list">
                         <li class="nav-header">Execution time</li>
-                        <li class="active"><a href="#">Link</a></li>
-                        <li><a href="#">Link</a></li>
+                        <li><input style="width: 90px;" id="exec_date" name="exec_date" maxlength="10" /></li>
 
                         <li class="nav-header">IOCs</li>
                         <li><div class="btn-group">
@@ -63,29 +64,47 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li>Action1</li>
+                                <li><a href="#">IOC 1</a></li>
+                                <li><a href="#">IOC 2</a></li>
+                                <li><a href="#">IOC 3</a></li>
                             </ul>
                             </div></li>
 
                         <li class="nav-header">Hosts</li>
-                        <li><div class="btn-group open">
+                        <li><div class="btn-group">
                             <button class="btn dropdown-toggle" data-toggle="dropdown">
                                 Select Hosts
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li>Action1</li>
-                                <li>Action1</li>
+                                <li><a href="#">Host 1</a></li>
+                                <li><a href="#">Host 2</a></li>
+                                <li><a href="#">Host 3</a></li>
                             </ul>
                             </div>
                         </li>
 
                         <li class="nav-header">Category</li>
-                        <li><a href="#">Link</a></li>
+                            <li>
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-01-01" id="id20111"/>Category 1</label> 
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-02-01" id="id20112"/>Category 2</label> 
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-03-01" id="id20113"/>Category 3</label> 
+                            </li>
+
                         <li class="nav-header">Severity</li>
-                        <li><a href="#">Link</a></li>
+                            <li>
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-01-01" id="id20111"/>Severity 1</label> 
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-02-01" id="id20112"/>Severity 2</label> 
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-03-01" id="id20113"/>Severity 3</label> 
+                            </li>
+
                         <li class="nav-header">Confidence</li>
-                        <li><a href="#">Link</a></li>
+                            <li>
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-01-01" id="id20111"/>Confidence 1</label> 
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-02-01" id="id20112"/>Confidence 2</label> 
+                            <label class="checkbox"><input type="checkbox" name="months[]" value="2011-03-01" id="id20113"/>Confidence 3</label> 
+                            </li>
+
                     </ul>
                 </div><!--/.well -->
             </div><!--/span-->
@@ -93,7 +112,7 @@
                 <div class="main-container">
                     <div class="switch btn-group">
                         <label>Group by</label>
-                        <button class="btn btn-primary" id="ioc-btn">IOC</button>
+                        <button class="btn btn-primary disabled" id="ioc-btn">IOC</button>
                         <button class="btn" id="host-btn">Host</button>
                     </div>
                     <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="tg_results">
@@ -124,6 +143,7 @@
 <script type=text/javascript src="{{url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
 <script type=text/javascript src="{{url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <script type=text/javascript src="{{url_for('static', filename='js/bootstrap-datatables.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/jquery-ui-1.8.18.datepicker.min.js') }}"></script>
 <script type=text/javascript>
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
@@ -151,19 +171,22 @@
             if (state == 'host') {
               state = 'ioc';
               loadDataTable(source_iocs);
-              $(this).addClass('btn-primary');
-              $('#host-btn').removeClass('btn-primary');
+              $(this).addClass('btn-primary disabled');
+              $('#host-btn').removeClass('btn-primary disabled');
               }
         });
         $('#host-btn').click(function () {
             if (state == 'ioc') {
               state = 'host';
               loadDataTable(source_hosts);
-              $(this).addClass('btn-primary');
-              $('#ioc-btn').removeClass('btn-primary');
+              $(this).addClass('btn-primary disabled');
+              $('#ioc-btn').removeClass('btn-primary disabled');
               }
         });
     } );
+    $(function() {
+        $("#exec_date").datepicker({ maxDate: "+0D" });
+    });
 </script>
 </body>
 
