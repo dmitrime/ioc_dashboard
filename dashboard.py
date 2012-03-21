@@ -1,30 +1,5 @@
-from flask import Flask, render_template, request, jsonify
-from flaskext.sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/tgstore.sdb'
-db = SQLAlchemy(app)
-
-class host_binary(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    host_guid = db.Column(db.Numeric)
-    md5hash = db.Column(db.Text)
-    execution_time = db.Column(db.DateTime)
-
-    def __repr__(self):
-        return "host_binary: <%d>" % self.id
-
-class tg_ioc(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    unique_ioc_string = db.Column(db.Text, unique=True)
-    categories = db.Column(db.Text)
-    title = db.Column(db.Text)
-    long_description = db.Column(db.Text)
-    severity = db.Column(db.Integer)
-    confidence = db.Column(db.Integer)
-
-    def __repr__(self):
-        return "tg_ioc: <%d>" % self.id
+from flask import render_template, request, jsonify
+from models import app, tg_ioc, host_binary
 
 
 @app.route('/_get_iocs')
@@ -34,7 +9,7 @@ def get_iocs():
 
 @app.route('/_get_host_binaries')
 def get_host_binaries():
-    columns = ['id', 'md5hash']
+    columns = ['id', 'host_guid']
     return get_datatable_items(host_binary, columns)
 
 def get_datatable_items(table, columns):
@@ -59,7 +34,6 @@ def get_datatable_items(table, columns):
     start = int(request.args.get('iDisplayStart', 0))
     limit = int(request.args.get('iDisplayLength', 10))
 
-    print where
     # main query with filter, order and paginate
     query = table.query.filter_by(**where)
     filtered_count = query.count()
