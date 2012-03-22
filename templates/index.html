@@ -63,10 +63,7 @@
                                 Select IOCs
                                 <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">IOC 1</a></li>
-                                <li><a href="#">IOC 2</a></li>
-                                <li><a href="#">IOC 3</a></li>
+                            <ul class="dropdown-menu" id="iocs-list">
                             </ul>
                             </div></li>
 
@@ -76,19 +73,13 @@
                                 Select Hosts
                                 <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">Host 1</a></li>
-                                <li><a href="#">Host 2</a></li>
-                                <li><a href="#">Host 3</a></li>
+                            <ul class="dropdown-menu" id="hosts-list">
                             </ul>
                             </div>
                         </li>
 
                         <li class="nav-header">Category</li>
-                            <li>
-                            <label class="checkbox"><input type="checkbox" name="category[]" value="1" id="id20111"/>Category 1</label> 
-                            <label class="checkbox"><input type="checkbox" name="category[]" value="2" id="id20112"/>Category 2</label> 
-                            <label class="checkbox"><input type="checkbox" name="category[]" value="3" id="id20113"/>Category 3</label> 
+                            <li id="categories-list">
                             </li>
 
                         <li class="nav-header">Severity</li>
@@ -164,6 +155,31 @@
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
 <script type="text/javascript" charset="utf-8">
+    function dump(arr,level) {
+        var dumped_text = "";
+        if(!level) level = 0;
+
+        //The padding given at the beginning of the line.
+        var level_padding = "";
+        for(var j=0;j<level+1;j++) level_padding += "    ";
+
+        if(typeof(arr) == 'object') { //Array/Hashes/Objects 
+            for(var item in arr) {
+                var value = arr[item];
+
+                if(typeof(value) == 'object') { //If it is an array,
+                    dumped_text += level_padding + "'" + item + "' ...\n";
+                    dumped_text += dump(value,level+1);
+                } else {
+                    dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
+                }
+            }
+        } else { //Stings/Chars/Numbers etc.
+            dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
+        }
+        return dumped_text;
+    }
+
     /* Table initialisation */
     var state = 'ioc';
     var source_iocs = $SCRIPT_ROOT + "/_get_iocs";
@@ -199,9 +215,27 @@
               $('#ioc-btn').removeClass('btn-primary disabled');
               }
         });
+
+        // populate iocs with json queries
         $.getJSON($SCRIPT_ROOT + "/_populate_iocs",
                   function (data) {
-                      alert(data);
+                      var items = []
+                      $.each(data.iocs, function(ind, row) {items.push('<li><a href="#">' + row[0] + ', ' + row[1] + '</a></li>');});
+                      $(items.join('\n')).appendTo('ul #iocs-list');
+                  });
+        // populate hosts
+        $.getJSON($SCRIPT_ROOT + "/_populate_hosts",
+                  function (data) {
+                      var items = []
+                      $.each(data.hosts, function(ind, row) {items.push('<li><a href="#">' + row[0] + '</a></li>');});
+                      $(items.join('\n')).appendTo('ul #hosts-list');
+                  });
+        // populate categories
+        $.getJSON($SCRIPT_ROOT + "/_populate_categories",
+                  function (data) {
+                      var items = []
+                      $.each(data.categories, function(ind, row) {items.push('<label class="checkbox"><input type="checkbox" name="category[]" value="' + row + '"/>' + row + '</label>');});
+                      $(items.join('\n')).appendTo('ul #categories-list');
                   });
     } );
     $(function() {

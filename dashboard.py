@@ -55,19 +55,21 @@ def get_datatable_items(table, columns, group):
 
 @app.route('/_populate_iocs')
 def populate_iocs():
-    results = tg_iocs.query.all()
-    rows = []
-    for r in results:
-        rows.append([r.title, r.id])
-    return jsonify(rows)
+    results = tg_ioc.query.order_by(tg_ioc.id).values(tg_ioc.title, tg_ioc.id)
+    return jsonify({'iocs': [list(r) for r in results]})
 
 @app.route('/_populate_hosts')
 def populate_hosts():
-    results = host_binary.query.distinct(host_binary.host_guid)
-    rows = []
+    results = host_binary.query.group_by(host_binary.host_guid).values(host_binary.host_guid)
+    return jsonify({'hosts': [list(r) for r in results]})
+
+@app.route('/_populate_categories')
+def populate_categories():
+    results = tg_ioc.query.group_by(tg_ioc.categories).values(tg_ioc.categories)
+    cat = set([])
     for r in results:
-        rows.append([r.title, r.id])
-    return jsonify(rows)
+        cat.update(r[0].split(','))
+    return jsonify({'categories':list(cat)})
 
 @app.route('/')
 def hello():
