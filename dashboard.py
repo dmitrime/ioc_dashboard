@@ -1,55 +1,51 @@
 from flask import render_template, request, jsonify
-from models import app, tg_ioc, host_binary
-
+from models import app, db, tg_ioc, host_binary, host_ioc
+from sqlalchemy import func
 
 @app.route('/_get_iocs')
 def get_iocs():
-    columns = ['title']
-    return get_datatable_items(tg_ioc, columns, tg_ioc.title)
+    order = 'sum ' + request.args.get('sSortDir_0', 'desc')
+    sum_by = request.args.get('sSumBy', 'severity')
+
+    if sum_by == 'host_count':
+        query = db.session.query(tg_ioc.title, func.count(host_binary.host_guid).label('sum')). \
+                join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
+    elif sum_by == 'severity':
+        query = db.session.query(tg_ioc.title, tg_ioc.severity.label('sum')). \
+                join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
+    return get_datatable_items(query)
 
 @app.route('/_get_host_binaries')
 def get_host_binaries():
-    columns = ['host_guid']
-    return get_datatable_items(host_binary, columns, host_binary.host_guid)
+    order = 'sum ' + request.args.get('sSortDir_0', 'desc')
+    sum_by = request.args.get('sSumBy', 'severity')
 
-def get_datatable_items(table, columns, group):
-    print(type(group))
-    # sorting
-    order = []
-    sortingCols = int(request.args.get('iSortingCols', 0))
-    for i in range(sortingCols):
-        val = int(request.args.get('iSortCol_%d' % i, '0'))
-        isSortable = request.args.get('bSortable_%d' % val, 'false')
-        if isSortable == 'true':
-            order.append(columns[val] + ' ' + request.args.get('sSortDir_%d' % i, 'desc'))
+    if sum_by == 'ioc_count':
+        query = db.session.query(host_binary.host_guid, func.count(tg_ioc.id).label('sum')). \
+                join(host_ioc).join(tg_ioc).group_by(host_binary.host_guid).order_by(order)
+    elif sum_by == 'severity':
+        query = db.session.query(host_binary.host_guid, func.sum(tg_ioc.severity).label('sum')). \
+                join(host_ioc).join(tg_ioc).group_by(host_binary.host_guid).order_by(order)
+    return get_datatable_items(query)
 
+def get_datatable_items(query):
     # filtering TODO
-    where = {}
-    search = request.args.get('sSearch', '')
-    if search != '':
-        where[columns[1]] = search
+    #search = request.args.get('sSearch', '')
 
     # record count before filtering
-    count = table.query.group_by(group).count()
+    count = query.count()
 
     start = int(request.args.get('iDisplayStart', 0))
     limit = int(request.args.get('iDisplayLength', 10))
 
-    # main query with filter, order and paginate
-    query = table.query.group_by(group).filter_by(**where)
-    filtered_count = query.count()
-    query = query.order_by(*order).limit(limit).offset(start)
     print query
-    results = query.all()
+    results = query.limit(limit).offset(start).all()
 
-    rows = []
-    for r in results:
-        vals = [getattr(r, sel) for sel in columns]
-        vals.append(0)
-        rows.append(vals)
+    rows = [list(r) for r in results]
     d = {   'sEcho':request.args.get('sEcho',0),
             'iTotalRecords':count,
-            'iTotalDisplayRecords':filtered_count,
+            #'iTotalDisplayRecords':filtered_count,
+            'iTotalDisplayRecords':count,
             'aaData':rows}
     return jsonify(d)
 
