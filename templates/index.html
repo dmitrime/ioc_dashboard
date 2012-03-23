@@ -22,6 +22,7 @@
     }
     div.switch {
         margin-bottom: 10px;
+        margin-right: 10px;
         float: right;
     }
 </style>
@@ -118,6 +119,11 @@
             <div class="span10">
                 <div class="main-container">
                     <div class="switch btn-group">
+                        <label>Sum by</label>
+                        <button class="btn btn-primary disabled" id="severity-btn">Severity</button>
+                        <button class="btn" id="count-btn">Host count</button>
+                    </div>
+                    <div class="switch btn-group">
                         <label>Group by</label>
                         <button class="btn btn-primary disabled" id="ioc-btn">IOC</button>
                         <button class="btn" id="host-btn">Host</button>
@@ -181,39 +187,78 @@
     }
 
     /* Table initialisation */
-    var state = 'ioc';
+    var group_by = 'ioc';
+    var sum_by = 'severity';
     var source_iocs = $SCRIPT_ROOT + "/_get_iocs";
     var source_hosts = $SCRIPT_ROOT + "/_get_host_binaries";
+
     var loadDataTable = function(ajaxSource) {
-    $('#tg_results').dataTable( {
-            "bProcessing": true,
-            "bServerSide": true,
-            "bDestroy": true,
-            "sAjaxSource": ajaxSource,
-            "sDom": "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>",
-            "sPaginationType": "bootstrap",
-            "oLanguage": {"sLengthMenu": "_MENU_ records per page"}
+        $('#tg_results').dataTable( {
+                    "bProcessing": true,
+                    "bServerSide": true,
+                    "bDestroy": true,
+                    "bAutoWidth": false,
+                    "sAjaxSource": ajaxSource,
+                    "sDom": "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>",
+                    "sPaginationType": "bootstrap",
+                    "oLanguage": {"sLengthMenu": "_MENU_ records per page"},
+                    "fnServerParams": function ( aoData ) {
+                        aoData.push( { "name" : "sSumBy", "value" : sum_by } );
+                    }
             });
     }
     $(function() {
         // load ioc source first time
         loadDataTable(source_iocs); 
-        // add ioc and host button handlers
+
+        // add group by ioc and host button handlers
         $('#ioc-btn').click(function () {
-            if (state == 'host') {
-              state = 'ioc';
-              loadDataTable(source_iocs);
-              $(this).addClass('btn-primary disabled');
-              $('#host-btn').removeClass('btn-primary disabled');
-              }
+                  group_by = 'ioc';
+                  if (sum_by == 'ioc_count') {
+                      sum_by = 'host_count';
+                  }
+                  $(this).addClass('btn-primary disabled');
+                  $('#host-btn').removeClass('btn-primary disabled');
+                  $('#count-btn').text('Host count');
+                  loadDataTable(source_iocs);
         });
         $('#host-btn').click(function () {
-            if (state == 'ioc') {
-              state = 'host';
-              loadDataTable(source_hosts);
-              $(this).addClass('btn-primary disabled');
-              $('#ioc-btn').removeClass('btn-primary disabled');
+                  group_by = 'host';
+                  if (sum_by == 'host_count') {
+                      sum_by = 'ioc_count';
+                  }
+                  $(this).addClass('btn-primary disabled');
+                  $('#ioc-btn').removeClass('btn-primary disabled');
+                  $('#count-btn').text('IOC count');
+                  loadDataTable(source_hosts);
+        });
+
+        // add sum by button handlers
+        $('#severity-btn').click(function () {
+            if (sum_by != 'severity') {
+                  sum_by = 'severity';
+                  $(this).addClass('btn-primary disabled');
+                  $('#count-btn').removeClass('btn-primary disabled');
+                  if (group_by == 'ioc') {
+                      $('#ioc-btn').click();
+                  } else {
+                      $('#host-btn').click();
+                  }
               }
+        });
+        $('#count-btn').click(function () {
+            if (sum_by == 'severity') {
+                $(this).addClass('btn-primary disabled');
+                $('#severity-btn').removeClass('btn-primary disabled');
+                if (group_by == 'ioc')
+                {
+                    sum_by = 'host_count';
+                    $('#ioc-btn').click();
+                } else {
+                    sum_by = 'ioc_count';
+                    $('#host-btn').click();
+                }
+            }
         });
 
         // populate iocs with json queries
