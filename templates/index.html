@@ -16,9 +16,9 @@
     }
     div.hero-small {
         padding: 25px;
+        padding-left: 60px;
         font-size: 14px;
         margin-bottom: auto;
-        padding-left: 47px;
         display: none;
     }
     td.details {
@@ -40,7 +40,8 @@
 </style>
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-responsive.min.css") }} />
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-datatables.css") }} />
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/flick/jquery-ui-1.8.18.datepicker.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/flick/jquery-ui-1.8.18.custom.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/jquery.multiselect.css") }} />
 </head>
 
 <body>
@@ -71,60 +72,56 @@
                         <li><input style="width: 90px;" id="exec_date" name="exec_date" maxlength="10" /></li>
 
                         <li class="nav-header">IOCs</li>
-                        <li><div class="btn-group">
-                            <button class="btn dropdown-toggle" data-toggle="dropdown">
-                                Select IOCs
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" id="iocs-list">
-                            </ul>
-                            </div></li>
+                            <li>
+                                <select title="IOCs" name="iocs" id="iocs-list" multiple="multiple">
+                                </select>
+                            </li>
 
                         <li class="nav-header">Hosts</li>
-                        <li><div class="btn-group">
-                            <button class="btn dropdown-toggle" data-toggle="dropdown">
-                                Select Hosts
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" id="hosts-list">
-                            </ul>
-                            </div>
-                        </li>
+                            <li>
+                                <select title="Hosts" name="hosts" id="hosts-list" multiple="multiple">
+                                </select>
+                            </li>
 
                         <li class="nav-header">Category</li>
-                            <li id="categories-list">
+                            <li>
+                                <select title="Category" name="category" id="categories-list" multiple="multiple">
+                                </select>
                             </li>
 
                         <li class="nav-header">Severity</li>
                             <li>
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="0" />0</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="10" />10</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="20" />20</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="30" />30</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="40" />40</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="50" />50</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="60" />60</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="70" />70</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="80" />80</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="90" />90</label> 
-                            <label class="checkbox"><input type="checkbox" name="severity[]" value="100"/>100</label> 
+                            <select title="Severity" name="severity" multiple="multiple">
+                                <option value="0"> 0 </option> 
+                                <option value="10">10</option> 
+                                <option value="20">20</option> 
+                                <option value="30">30</option> 
+                                <option value="40">40</option> 
+                                <option value="50">50</option> 
+                                <option value="60">60</option> 
+                                <option value="70">70</option> 
+                                <option value="80">80</option> 
+                                <option value="90">90</option> 
+                                <option value="100">100</option> 
+                            </select>
                             </li>
 
                         <li class="nav-header">Confidence</li>
                             <li>
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="0" />0</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="10" />10</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="20" />20</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="30" />30</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="40" />40</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="50" />50</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="60" />60</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="70" />70</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="80" />80</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="90" />90</label> 
-                            <label class="checkbox"><input type="checkbox" name="confidence[]" value="100"/>100</label> 
+                            <select title="Confidence" name="confidence" multiple="multiple">
+                                <option value="0"> 0 </option> 
+                                <option value="10">10</option> 
+                                <option value="20">20</option> 
+                                <option value="30">30</option> 
+                                <option value="40">40</option> 
+                                <option value="50">50</option> 
+                                <option value="60">60</option> 
+                                <option value="70">70</option> 
+                                <option value="80">80</option> 
+                                <option value="90">90</option> 
+                                <option value="100">100</option> 
+                            </select>
                             </li>
-
                     </ul>
                 </div><!--/.well -->
             </div><!--/span-->
@@ -169,7 +166,8 @@
 <script type=text/javascript src="{{url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
 <script type=text/javascript src="{{url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <script type=text/javascript src="{{url_for('static', filename='js/bootstrap-datatables.js') }}"></script>
-<script type=text/javascript src="{{url_for('static', filename='js/jquery-ui-1.8.18.datepicker.min.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/jquery-ui-1.8.18.custom.min.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/jquery.multiselect.min.js') }}"></script>
 <script type=text/javascript>
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
@@ -291,22 +289,37 @@
         $.getJSON($SCRIPT_ROOT + "/_populate_iocs",
                   function (data) {
                       var items = []
-                      $.each(data.iocs, function(ind, row) {items.push('<li><a href="#">' + row[0] + ', ' + row[1] + '</a></li>');});
+                      $.each(data.iocs, function(ind, row) {items.push('<option value="' + row[0] + '">' + row[0] + ', ' + row[1] + '</option>');});
                       $(items.join('\n')).appendTo('ul #iocs-list');
+                      $("select[name=iocs]").multiselect({
+                          multiple: false,
+                          header: false,
+                          noneSelectedText: "Select IOC",
+                          selectedList: 1
+                      });
                   });
         // populate hosts
         $.getJSON($SCRIPT_ROOT + "/_populate_hosts",
                   function (data) {
                       var items = []
-                      $.each(data.hosts, function(ind, row) {items.push('<li><a href="#">' + row[0] + '</a></li>');});
+                      $.each(data.hosts, function(ind, row) {items.push('<option value="' + row[0] + '">' + row[0] + '</option>');});
                       $(items.join('\n')).appendTo('ul #hosts-list');
+                      $("select[name=hosts]").multiselect({
+                          multiple: false,
+                          header: false,
+                          noneSelectedText: "Select Host",
+                          selectedList: 1
+                      });
                   });
         // populate categories
         $.getJSON($SCRIPT_ROOT + "/_populate_categories",
                   function (data) {
                       var items = []
-                      $.each(data.categories, function(ind, row) {items.push('<label class="checkbox"><input type="checkbox" name="category[]" value="' + row + '"/>' + row + '</label>');});
+                      $.each(data.categories, function(ind, row) {items.push('<option value="' + row + '">' + row + '</option>');});
                       $(items.join('\n')).appendTo('ul #categories-list');
+                      $("select[name=category]").multiselect({noneSelectedText: "Select Category", checkAllText: "All", uncheckAllText: "None"});
+                      $('.ui-multiselect').css('width', '165px');
+                      $('.ui-multiselect-menu').css('width', '160px');
                   });
 
         // expand row logic
@@ -358,6 +371,9 @@
         }
         // init datepicker
         $("#exec_date").datepicker({ maxDate: "+0D" });
+        // init multiselect
+        $("select[name=severity]").multiselect({noneSelectedText: "Select Severity", checkAllText: "All", uncheckAllText: "None"});
+        $("select[name=confidence]").multiselect({noneSelectedText: "Select Confidence", checkAllText: "All", uncheckAllText: "None"});
     } );
 </script>
 </body>
