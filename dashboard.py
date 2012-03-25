@@ -1,6 +1,8 @@
 from flask import render_template, request, jsonify
-from models import app, db, tg_ioc, host_binary, host_ioc
+from models import app, db, tg_ioc, host_binary, host_ioc, tg_binary
 from sqlalchemy import func
+import datetime
+import decimal
 
 @app.route('/_get_iocs')
 def get_iocs():
@@ -8,10 +10,10 @@ def get_iocs():
     sum_by = request.args.get('sSumBy', 'severity')
 
     if sum_by == 'host_count':
-        query = db.session.query(tg_ioc.title, func.count(host_binary.host_guid).label('sum')). \
+        query = db.session.query(tg_ioc.title, func.count(host_binary.host_guid).label('sum'), tg_ioc.id). \
                 join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
     elif sum_by == 'severity':
-        query = db.session.query(tg_ioc.title, tg_ioc.severity.label('sum')). \
+        query = db.session.query(tg_ioc.title, tg_ioc.severity.label('sum'), tg_ioc.id). \
                 join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
     return get_datatable_items(query)
 
@@ -40,14 +42,53 @@ def get_datatable_items(query):
 
     print query
     results = query.limit(limit).offset(start).all()
-
     rows = [list(r) for r in results]
+    rows = process_decimal(rows)
     d = {   'sEcho':request.args.get('sEcho',0),
             'iTotalRecords':count,
             #'iTotalDisplayRecords':filtered_count,
             'iTotalDisplayRecords':count,
             'aaData':rows}
     return jsonify(d)
+
+'''
+Creates list of results, formatting the date at given index
+'''
+def process_date(results, ind):
+    for row in results:
+        if type(row[ind]) == datetime.datetime:
+            row[ind] = row[ind].strftime("%Y-%m-%d") 
+    return results
+'''
+Decimal type cannot be jsonified.
+'''
+def process_decimal(results):
+    for row in results:
+        for ind in range(len(row)):
+            if type(row[ind]) == decimal.Decimal:
+                row[ind] = str(row[ind].to_integral_value())
+    return results
+
+@app.route('/_get_ioc_details')
+def get_ioc_details():
+    keyId = request.args.get('keyId', 0)
+    query = db.session.query(host_binary.host_guid, host_binary.execution_time, host_binary.md5hash, tg_binary.tg_id). \
+            join(host_ioc).join(tg_ioc).join(tg_binary).filter(tg_ioc.id==keyId)
+    #print "\n", query, "\n"
+    rows = [list(r) for r in query.all()]
+    rows = process_decimal(rows)
+    rows = process_date(rows, 1)
+    return jsonify({'details':rows})
+
+@app.route('/_get_host_details')
+def get_host_details():
+    keyId = request.args.get('keyId', 0)
+    query = db.session.query(tg_ioc.title, host_binary.execution_time, tg_ioc.severity, tg_binary.tg_id). \
+            join(host_ioc).join(host_binary).join(tg_binary).filter(host_binary.host_guid==keyId)
+    #print "\n", query, "\n"
+    rows = [list(r) for r in query.all()]
+    rows = process_date(rows, 1)
+    return jsonify({'details':rows})
 
 @app.route('/_populate_iocs')
 def populate_iocs():
@@ -57,7 +98,9 @@ def populate_iocs():
 @app.route('/_populate_hosts')
 def populate_hosts():
     results = host_binary.query.group_by(host_binary.host_guid).values(host_binary.host_guid)
-    return jsonify({'hosts': [list(r) for r in results]})
+    rows = [list(r) for r in results]
+    rows = process_decimal(rows)
+    return jsonify({'hosts': rows})
 
 @app.route('/_populate_categories')
 def populate_categories():
