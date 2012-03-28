@@ -42,6 +42,7 @@
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-datatables.css") }} />
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/flick/jquery-ui-1.8.18.custom.css") }} />
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/jquery.multiselect.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/jquery.multiselect.filter.css") }} />
 </head>
 
 <body>
@@ -92,34 +93,34 @@
                         <li class="nav-header">Severity</li>
                             <li>
                             <select title="Severity" name="severity" multiple="multiple">
-                                <option value="0"> 0 </option> 
-                                <option value="10">10</option> 
-                                <option value="20">20</option> 
-                                <option value="30">30</option> 
-                                <option value="40">40</option> 
-                                <option value="50">50</option> 
-                                <option value="60">60</option> 
-                                <option value="70">70</option> 
-                                <option value="80">80</option> 
-                                <option value="90">90</option> 
-                                <option value="100">100</option> 
+                                <option selected="selected" value="0"> 0 </option> 
+                                <option selected="selected" value="10">10</option> 
+                                <option selected="selected" value="20">20</option> 
+                                <option selected="selected" value="30">30</option> 
+                                <option selected="selected" value="40">40</option> 
+                                <option selected="selected" value="50">50</option> 
+                                <option selected="selected" value="60">60</option> 
+                                <option selected="selected" value="70">70</option> 
+                                <option selected="selected" value="80">80</option> 
+                                <option selected="selected" value="90">90</option> 
+                                <option selected="selected" value="100">100</option> 
                             </select>
                             </li>
 
                         <li class="nav-header">Confidence</li>
                             <li>
                             <select title="Confidence" name="confidence" multiple="multiple">
-                                <option value="0"> 0 </option> 
-                                <option value="10">10</option> 
-                                <option value="20">20</option> 
-                                <option value="30">30</option> 
-                                <option value="40">40</option> 
-                                <option value="50">50</option> 
-                                <option value="60">60</option> 
-                                <option value="70">70</option> 
-                                <option value="80">80</option> 
-                                <option value="90">90</option> 
-                                <option value="100">100</option> 
+                                <option selected="selected" value="0"> 0 </option> 
+                                <option selected="selected" value="10">10</option> 
+                                <option selected="selected" value="20">20</option> 
+                                <option selected="selected" value="30">30</option> 
+                                <option selected="selected" value="40">40</option> 
+                                <option selected="selected" value="50">50</option> 
+                                <option selected="selected" value="60">60</option> 
+                                <option selected="selected" value="70">70</option> 
+                                <option selected="selected" value="80">80</option> 
+                                <option selected="selected" value="90">90</option> 
+                                <option selected="selected" value="100">100</option> 
                             </select>
                             </li>
                     </ul>
@@ -168,6 +169,7 @@
 <script type=text/javascript src="{{url_for('static', filename='js/bootstrap-datatables.js') }}"></script>
 <script type=text/javascript src="{{url_for('static', filename='js/jquery-ui-1.8.18.custom.min.js') }}"></script>
 <script type=text/javascript src="{{url_for('static', filename='js/jquery.multiselect.min.js') }}"></script>
+<script type=text/javascript src="{{url_for('static', filename='js/jquery.multiselect.filter.min.js') }}"></script>
 <script type=text/javascript>
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
@@ -289,37 +291,32 @@
         $.getJSON($SCRIPT_ROOT + "/_populate_iocs",
                   function (data) {
                       var items = []
-                      $.each(data.iocs, function(ind, row) {items.push('<option value="' + row[0] + '">' + row[0] + ', ' + row[1] + '</option>');});
+                      $.each(data.iocs, function(ind, row) {items.push('<option value="' + row[0] + '" selected="selected">' + row[0] + '</option>');});
                       $(items.join('\n')).appendTo('ul #iocs-list');
                       $("select[name=iocs]").multiselect({
-                          multiple: false,
-                          header: false,
-                          noneSelectedText: "Select IOC",
-                          selectedList: 1
-                      });
+                          noneSelectedText: "Select IOC"
+                      }).multiselectfilter();
                   });
         // populate hosts
         $.getJSON($SCRIPT_ROOT + "/_populate_hosts",
                   function (data) {
                       var items = []
-                      $.each(data.hosts, function(ind, row) {items.push('<option value="' + row[0] + '">' + row[0] + '</option>');});
+                      $.each(data.hosts, function(ind, row) {items.push('<option value="' + row[0] + '" selected="selected">' + row[0] + '</option>');});
                       $(items.join('\n')).appendTo('ul #hosts-list');
                       $("select[name=hosts]").multiselect({
-                          multiple: false,
-                          header: false,
-                          noneSelectedText: "Select Host",
-                          selectedList: 1
-                      });
+                          noneSelectedText: "Select Host"
+                      }).multiselectfilter();
                   });
         // populate categories
         $.getJSON($SCRIPT_ROOT + "/_populate_categories",
                   function (data) {
                       var items = []
-                      $.each(data.categories, function(ind, row) {items.push('<option value="' + row + '">' + row + '</option>');});
+                      $.each(data.categories, function(ind, row) {items.push('<option value="' + row + '" selected="selected">' + row + '</option>');});
                       $(items.join('\n')).appendTo('ul #categories-list');
-                      $("select[name=category]").multiselect({noneSelectedText: "Select Category", checkAllText: "All", uncheckAllText: "None"});
+                      $("select[name=category]").multiselect({
+                          noneSelectedText: "Select Category"
+                      }).multiselectfilter();
                       $('.ui-multiselect').css('width', '165px');
-                      $('.ui-multiselect-menu').css('width', '160px');
                   });
 
         // expand row logic
@@ -347,12 +344,11 @@
         {
             var oData = Table.fnGetData(nTr);
             var details_url = '/_get_' + group_by + '_details';
+            var primary = oData[2];
             if (group_by == 'host') {
                 var header = '<thead><tr><th>Title</th><th>Execution time</th><th>Severity</th><th>Link</th></tr></thead>'
-                var primary = oData[0];
             } else if (group_by == 'ioc') {
                 var header = '<thead><tr><th>Host</th><th>Execution time</th><th>Md5hash</th><th>Link</th></tr></thead>'
-                var primary = oData[2];
             }
             $.getJSON($SCRIPT_ROOT + details_url,
                       {'keyId': primary},
@@ -372,8 +368,8 @@
         // init datepicker
         $("#exec_date").datepicker({ maxDate: "+0D" });
         // init multiselect
-        $("select[name=severity]").multiselect({noneSelectedText: "Select Severity", checkAllText: "All", uncheckAllText: "None"});
-        $("select[name=confidence]").multiselect({noneSelectedText: "Select Confidence", checkAllText: "All", uncheckAllText: "None"});
+        $("select[name=severity]").multiselect({noneSelectedText: "Select Severity"}).multiselectfilter();
+        $("select[name=confidence]").multiselect({noneSelectedText: "Select Confidence"}).multiselectfilter();
     } );
 </script>
 </body>

@@ -12,7 +12,7 @@ host_ioc = db.Table('tg_binary_ioc',
 
 class host_binary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    host_guid = db.Column(db.Numeric)
+    host_guid = db.Column(db.BigInteger, db.ForeignKey('host_guid.host_guid'))
     md5hash = db.Column(db.Text, db.ForeignKey('tg_binary.md5hash'))
     execution_time = db.Column(db.DateTime)
 
@@ -22,6 +22,15 @@ class host_binary(db.Model):
 
     def __repr__(self):
         return "host_binary: <%d>" % self.id
+
+class host_guid(db.Model):
+    host_guid = db.Column(db.BigInteger, primary_key=True)
+    host_name = db.Column(db.Text)
+
+    host = db.relationship('host_binary', uselist=False, backref='guid', lazy='dynamic')
+
+    def __repr__(self):
+        return "host_guid: <%d>" % self.host_guid
 
 class tg_binary(db.Model):
     md5hash = db.Column(db.Text, primary_key=True)
