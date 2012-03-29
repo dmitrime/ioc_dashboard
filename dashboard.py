@@ -30,6 +30,9 @@ def get_host_binaries():
                 join(host_binary).join(host_ioc).join(tg_ioc).group_by(host_binary.host_guid).order_by(order)
     return get_datatable_items(query)
 
+def is_null(var):
+    return var == 'null'
+
 def apply_filters(query, exec_date, iocs, hosts, catgs, sevrs, confs):
     if exec_date:
         try:
@@ -38,25 +41,27 @@ def apply_filters(query, exec_date, iocs, hosts, catgs, sevrs, confs):
         except ValueError:
             pass
 
-    if iocs:
-        vals = [int(v) for v in iocs.split(',')]
-        query = query.filter(tg_ioc.id.in_(vals))
+    # all should be empty on initial page load
+    if not iocs and not hosts and not catgs and not sevrs and not confs:
+        return query
+    # 'null' when all checkboxes are unchecked
+    elif is_null(iocs) or is_null(hosts) or is_null(catgs) or is_null(sevrs) or is_null(confs):
+        return None
 
-    if hosts:
-        vals = [int(v) for v in hosts.split(',')]
-        query = query.filter(host_guid.host_guid.in_(vals))
+    vals = [int(v) for v in iocs.split(',')]
+    query = query.filter(tg_ioc.id.in_(vals))
 
-    if catgs:
-        vals = [tg_ioc.categories.like('%'+cat+'%') for cat in catgs.split(',')]
-        query = query.filter(or_(*vals))
+    vals = [int(v) for v in hosts.split(',')]
+    query = query.filter(host_guid.host_guid.in_(vals))
 
-    if sevrs:
-        vals = [int(v) for v in sevrs.split(',')]
-        query = query.filter(tg_ioc.severity.in_(vals))
+    vals = [tg_ioc.categories.like('%'+cat+'%') for cat in catgs.split(',')]
+    query = query.filter(or_(*vals))
 
-    if confs:
-        vals = [int(v) for v in confs.split(',')]
-        query = query.filter(tg_ioc.confidence.in_(vals))
+    vals = [int(v) for v in sevrs.split(',')]
+    query = query.filter(tg_ioc.severity.in_(vals))
+
+    vals = [int(v) for v in confs.split(',')]
+    query = query.filter(tg_ioc.confidence.in_(vals))
 
     return query
 
@@ -73,11 +78,15 @@ def get_datatable_items(query):
     count = query.count()
     query = apply_filters(query, exec_date, ioc_list, host_list, catg_list, sevr_list, conf_list)
     print query
-    filtered_count = query.count()
 
-    start = int(request.args.get('iDisplayStart', 0))
-    limit = int(request.args.get('iDisplayLength', 10))
-    results = query.limit(limit).offset(start).all()
+    results = []
+    filtered_count = 0
+    if query != None:
+        filtered_count = query.count()
+
+        start = int(request.args.get('iDisplayStart', 0))
+        limit = int(request.args.get('iDisplayLength', 10))
+        results = query.limit(limit).offset(start).all()
 
     # everything sent as text
     rows = [[str(it) for it in list(r)] for r in results]
@@ -85,6 +94,7 @@ def get_datatable_items(query):
             'iTotalRecords':count,
             'iTotalDisplayRecords':filtered_count,
             'aaData':rows}
+    print d
     return jsonify(d)
 
 '''
