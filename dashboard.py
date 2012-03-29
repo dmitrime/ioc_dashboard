@@ -13,7 +13,7 @@ def get_iocs():
                 join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
     elif sum_by == 'severity':
         query = db.session.query(tg_ioc.title, tg_ioc.severity.label('sum'), tg_ioc.id). \
-                group_by(tg_ioc.id).order_by(order)
+                join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
     return get_datatable_items(query)
 
 @app.route('/_get_host_binaries')
@@ -81,12 +81,12 @@ def get_host_details():
 
 @app.route('/_populate_iocs')
 def populate_iocs():
-    results = tg_ioc.query.order_by(tg_ioc.id).values(tg_ioc.unique_ioc_string, tg_ioc.id)
+    results = db.session.query(tg_ioc.unique_ioc_string).distinct().order_by(tg_ioc.unique_ioc_string)
     return jsonify({'iocs': [list(r) for r in results]})
 
 @app.route('/_populate_hosts')
 def populate_hosts():
-    results = host_guid.query.group_by(host_guid.host_guid).values(host_guid.host_name)
+    results = db.session.query(host_guid.host_name).distinct().order_by(host_guid.host_name).all()
     rows = [list(r) for r in results]
     return jsonify({'hosts': rows})
 
@@ -101,12 +101,22 @@ def extract_categories(str):
 
 @app.route('/_populate_categories')
 def populate_categories():
-    results = tg_ioc.query.group_by(tg_ioc.categories).values(tg_ioc.categories)
+    results = db.session.query(tg_ioc.categories).distinct().all()
     cat = set([])
     for r in results:
         cat.update(extract_categories(r[0]))
     cat = sorted(cat)
     return jsonify({'categories':list(cat)})
+
+@app.route('/_populate_severities')
+def populate_severities():
+    results = db.session.query(tg_ioc.severity).distinct().order_by(tg_ioc.severity).all()
+    return jsonify({'severities': [list(r) for r in results]})
+
+@app.route('/_populate_confidences')
+def populate_confidences():
+    results = db.session.query(tg_ioc.confidence).distinct().order_by(tg_ioc.confidence).all()
+    return jsonify({'confidences': [list(r) for r in results]})
 
 @app.route('/')
 def hello():
