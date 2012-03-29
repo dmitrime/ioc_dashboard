@@ -183,17 +183,19 @@
     var IOC_COUNT = 'ioc_count';
     var HOST_COUNT = 'host_count';
 
-    var group_by = 'ioc';
-    var sum_by = SEVERITY;
-
     var source_iocs = $SCRIPT_ROOT + "/_get_iocs";
     var source_hosts = $SCRIPT_ROOT + "/_get_host_binaries";
 
     // on document load
     $(function() {
+        var group_by = 'ioc';
+        var sum_by = SEVERITY;
+
         var Table;
+        var ajaxSource = source_iocs;
+        var params = {exec_date: "", iocs: [], hosts: [], categories: [], severities: [], confidences: []}
         /* Table initialisation */
-        var loadDataTable = function(ajaxSource) {
+        var loadDataTable = function() {
             Table = $('#tg_results').dataTable( {
                         "bProcessing": true,
                         "bServerSide": true,
@@ -209,12 +211,18 @@
                         "sPaginationType": "bootstrap",
                         "oLanguage": {"sLengthMenu": "_MENU_ records per page"},
                         "fnServerParams": function ( aoData ) {
-                            aoData.push( { "name" : "sSumBy", "value" : sum_by } );
+                            aoData.push( { "name" : "sSumBy",    "value" : sum_by } );
+                            aoData.push( { "name" : "sExecDate", "value" : params.exec_date } );
+                            //aoData.push( { "name" : "sIocs",     "value" : params.iocs } );
+                            //aoData.push( { "name" : "sHosts",    "value" : params.hosts } );
+                            //aoData.push( { "name" : "sCategories", "value" : params.categories } );
+                            //aoData.push( { "name" : "sSeverities", "value" : params.severities } );
+                            //aoData.push( { "name" : "sConfidences", "value" : params.confidences } );
                         }
                 });
         }
         // load ioc source first time
-        loadDataTable(source_iocs); 
+        loadDataTable(); 
 
         // add group by ioc and host button handlers
         $('#ioc-btn').click(function () {
@@ -225,7 +233,8 @@
               $(this).addClass('btn-primary disabled');
               $('#host-btn').removeClass('btn-primary disabled');
               $('#column1').text('Title');
-              loadDataTable(source_iocs);
+              ajaxSource = source_iocs;
+              loadDataTable();
         });
         $('#host-btn').click(function () {
               group_by = 'host';
@@ -235,7 +244,8 @@
               $(this).addClass('btn-primary disabled');
               $('#ioc-btn').removeClass('btn-primary disabled');
               $('#column1').text('Host');
-              loadDataTable(source_hosts);
+              ajaxSource = source_hosts;
+              loadDataTable();
         });
 
         // add sum by button handlers
@@ -366,6 +376,10 @@
         }
         // init datepicker
         $("#exec_date").datepicker({ maxDate: "+0D" });
+        $("#exec_date").change(function () {
+                params.exec_date = $(this).val(); 
+                loadDataTable();
+                });
     } );
 </script>
 </body>

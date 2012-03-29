@@ -2,6 +2,7 @@ from flask import render_template, request, jsonify
 from models import app, db, tg_ioc, host_binary, host_ioc, tg_binary, host_guid
 from sqlalchemy import func
 import datetime
+import time
 
 @app.route('/_get_iocs')
 def get_iocs():
@@ -29,9 +30,23 @@ def get_host_binaries():
                 join(host_binary).join(host_ioc).join(tg_ioc).group_by(host_binary.host_guid).order_by(order)
     return get_datatable_items(query)
 
+def apply_filters(query, exec_date):
+    if exec_date:
+        try:
+            dt = datetime.datetime.strptime(exec_date, '%m/%d/%Y')
+            query = query.filter(host_binary.execution_time >= dt)
+        except ValueError:
+            pass
+    return query
+
 def get_datatable_items(query):
-    # filtering TODO
-    #search = request.args.get('sSearch', '')
+    # filtering logic
+    exec_date = request.args.get('sExecDate', '')
+    #ioc_list  = request.args.get('sIocs', '')
+    #host_list = request.args.get('sHosts', '')
+    #categ_list  = request.args.get('sCategories', '')
+    #sever_list = request.args.get('sSeverities', '')
+    #conf_list = request.args.get('sConfidences', '')
 
     # record count before filtering
     count = query.count()
@@ -39,14 +54,15 @@ def get_datatable_items(query):
     start = int(request.args.get('iDisplayStart', 0))
     limit = int(request.args.get('iDisplayLength', 10))
 
+    query = apply_filters(query, exec_date)
     print query
+    filtered_count = query.count()
     results = query.limit(limit).offset(start).all()
-    # send everything as text
+    # everything sent as text
     rows = [[str(it) for it in list(r)] for r in results]
     d = {   'sEcho':request.args.get('sEcho',0),
             'iTotalRecords':count,
-            #'iTotalDisplayRecords':filtered_count,
-            'iTotalDisplayRecords':count,
+            'iTotalDisplayRecords':filtered_count,
             'aaData':rows}
     return jsonify(d)
 
