@@ -1,6 +1,6 @@
 from flask import render_template, request, jsonify
 from models import app, db, tg_ioc, host_binary, host_ioc, tg_binary, host_guid
-from sqlalchemy import func
+from sqlalchemy import func, or_
 import datetime
 import time
 
@@ -30,34 +30,55 @@ def get_host_binaries():
                 join(host_binary).join(host_ioc).join(tg_ioc).group_by(host_binary.host_guid).order_by(order)
     return get_datatable_items(query)
 
-def apply_filters(query, exec_date):
+def apply_filters(query, exec_date, iocs, hosts, catgs, sevrs, confs):
     if exec_date:
         try:
             dt = datetime.datetime.strptime(exec_date, '%m/%d/%Y')
             query = query.filter(host_binary.execution_time >= dt)
         except ValueError:
             pass
+
+    if iocs:
+        vals = [int(v) for v in iocs.split(',')]
+        query = query.filter(tg_ioc.id.in_(vals))
+
+    if hosts:
+        vals = [int(v) for v in hosts.split(',')]
+        query = query.filter(host_guid.host_guid.in_(vals))
+
+    if catgs:
+        vals = [tg_ioc.categories.like('%'+cat+'%') for cat in catgs.split(',')]
+        query = query.filter(or_(*vals))
+
+    if sevrs:
+        vals = [int(v) for v in sevrs.split(',')]
+        query = query.filter(tg_ioc.severity.in_(vals))
+
+    if confs:
+        vals = [int(v) for v in confs.split(',')]
+        query = query.filter(tg_ioc.confidence.in_(vals))
+
     return query
 
 def get_datatable_items(query):
     # filtering logic
     exec_date = request.args.get('sExecDate', '')
-    #ioc_list  = request.args.get('sIocs', '')
-    #host_list = request.args.get('sHosts', '')
-    #categ_list  = request.args.get('sCategories', '')
-    #sever_list = request.args.get('sSeverities', '')
-    #conf_list = request.args.get('sConfidences', '')
+    ioc_list  = request.args.get('sIocs', '')
+    host_list = request.args.get('sHosts', '')
+    catg_list = request.args.get('sCategories', '')
+    sevr_list = request.args.get('sSeverities', '')
+    conf_list = request.args.get('sConfidences', '')
 
-    # record count before filtering
+    # record count before filtering and after
     count = query.count()
+    query = apply_filters(query, exec_date, ioc_list, host_list, catg_list, sevr_list, conf_list)
+    print query
+    filtered_count = query.count()
 
     start = int(request.args.get('iDisplayStart', 0))
     limit = int(request.args.get('iDisplayLength', 10))
-
-    query = apply_filters(query, exec_date)
-    print query
-    filtered_count = query.count()
     results = query.limit(limit).offset(start).all()
+
     # everything sent as text
     rows = [[str(it) for it in list(r)] for r in results]
     d = {   'sEcho':request.args.get('sEcho',0),
@@ -97,12 +118,12 @@ def get_host_details():
 
 @app.route('/_populate_iocs')
 def populate_iocs():
-    results = db.session.query(tg_ioc.unique_ioc_string).distinct().order_by(tg_ioc.unique_ioc_string)
+    results = db.session.query(tg_ioc.unique_ioc_string, tg_ioc.id).distinct().order_by(tg_ioc.unique_ioc_string)
     return jsonify({'iocs': [list(r) for r in results]})
 
 @app.route('/_populate_hosts')
 def populate_hosts():
-    results = db.session.query(host_guid.host_name).distinct().order_by(host_guid.host_name).all()
+    results = db.session.query(host_guid.host_name, host_guid.host_guid).distinct().order_by(host_guid.host_name).all()
     rows = [list(r) for r in results]
     return jsonify({'hosts': rows})
 
