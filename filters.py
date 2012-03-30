@@ -1,5 +1,6 @@
 from models import tg_ioc, host_binary, host_guid
 from sqlalchemy import or_
+import datetime
 
 def is_null(var):
     return var == 'null'
