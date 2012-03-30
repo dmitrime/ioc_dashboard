@@ -1,6 +1,7 @@
 from flask import render_template, request, jsonify
 from models import app, db, tg_ioc, host_binary, host_ioc, tg_binary, host_guid
-from sqlalchemy import func, or_
+import filters 
+from sqlalchemy import func
 import datetime
 import time
 
@@ -30,43 +31,8 @@ def get_host_binaries():
                 join(host_binary).join(host_ioc).join(tg_ioc).group_by(host_binary.host_guid).order_by(order)
     return get_datatable_items(query)
 
-def is_null(var):
-    return var == 'null'
-
-def apply_filters(query, exec_date, iocs, hosts, catgs, sevrs, confs):
-    if exec_date:
-        try:
-            dt = datetime.datetime.strptime(exec_date, '%m/%d/%Y')
-            query = query.filter(host_binary.execution_time >= dt)
-        except ValueError:
-            pass
-
-    # all should be empty on initial page load
-    if not iocs and not hosts and not catgs and not sevrs and not confs:
-        return query
-    # 'null' when all checkboxes are unchecked
-    elif is_null(iocs) or is_null(hosts) or is_null(catgs) or is_null(sevrs) or is_null(confs):
-        return None
-
-    vals = [int(v) for v in iocs.split(',')]
-    query = query.filter(tg_ioc.id.in_(vals))
-
-    vals = [int(v) for v in hosts.split(',')]
-    query = query.filter(host_guid.host_guid.in_(vals))
-
-    vals = [tg_ioc.categories.like('%'+cat+'%') for cat in catgs.split(',')]
-    query = query.filter(or_(*vals))
-
-    vals = [int(v) for v in sevrs.split(',')]
-    query = query.filter(tg_ioc.severity.in_(vals))
-
-    vals = [int(v) for v in confs.split(',')]
-    query = query.filter(tg_ioc.confidence.in_(vals))
-
-    return query
-
 def get_datatable_items(query):
-    # filtering logic
+    # filtering 
     exec_date = request.args.get('sExecDate', '')
     ioc_list  = request.args.get('sIocs', '')
     host_list = request.args.get('sHosts', '')
@@ -76,7 +42,7 @@ def get_datatable_items(query):
 
     # record count before filtering and after
     count = query.count()
-    query = apply_filters(query, exec_date, ioc_list, host_list, catg_list, sevr_list, conf_list)
+    query = filters.filter_all(query, exec_date, ioc_list, host_list, catg_list, sevr_list, conf_list)
     print query
 
     results = []
@@ -94,7 +60,6 @@ def get_datatable_items(query):
             'iTotalRecords':count,
             'iTotalDisplayRecords':filtered_count,
             'aaData':rows}
-    print d
     return jsonify(d)
 
 '''
@@ -109,21 +74,39 @@ def process_date(results, ind):
 @app.route('/_get_ioc_details')
 def get_ioc_details():
     keyId = request.args.get('keyId', 0)
+    hosts = request.args.get('hosts', '')
+    exec_date = request.args.get('exec_date', '')
+
     query = db.session.query(host_guid.host_name, host_binary.execution_time, host_binary.md5hash, tg_binary.tg_id). \
             join(host_binary).join(tg_binary).join(host_ioc).join(tg_ioc).filter(tg_ioc.id==keyId)
-    #print "\n", query, "\n"
-    rows = [list(r) for r in query.all()]
-    rows = process_date(rows, 1)
+    query = filters.filter_date(query, exec_date)
+    query = filters.filter_hosts(query, hosts)
+  
+    print "\n", query, "\n", keyId
+    rows = []
+    if query != None:
+        rows = [list(r) for r in query.all()]
+        rows = process_date(rows, 1)
     return jsonify({'details':rows})
 
 @app.route('/_get_host_details')
 def get_host_details():
     keyId = request.args.get('keyId', 0)
+    iocs = request.args.get('iocs', '')
+    sevs = request.args.get('sevs', '')
+    exec_date = request.args.get('exec_date', '')
+
     query = db.session.query(tg_ioc.title, host_binary.execution_time, tg_ioc.severity, tg_binary.tg_id). \
             join(host_ioc).join(host_binary).join(tg_binary).filter(host_binary.host_guid==keyId)
+    query = filters.filter_date(query, exec_date)
+    query = filters.filter_iocs(query, iocs)
+    query = filters.filter_severities(query, sevs)
+
     print "\n", query, "\n", keyId
-    rows = [list(r) for r in query.all()]
-    rows = process_date(rows, 1)
+    rows = []
+    if query != None:
+        rows = [list(r) for r in query.all()]
+        rows = process_date(rows, 1)
     return jsonify({'details':rows})
 
 @app.route('/_populate_iocs')

@@ -221,8 +221,6 @@
                         }
                 });
         }
-        // load ioc source first time
-        loadDataTable(); 
 
         // add group by ioc and host button handlers
         $('#ioc-btn').click(function () {
@@ -276,6 +274,19 @@
             }
         });
 
+        // populated filter counter
+        var populated = 0;
+        // Load the main table when all filters have been populated
+        function populate_complete() {
+            populated += 1;
+            if (populated == 5)
+            {
+                $('.ui-multiselect').css('width', '165px');
+                loadDataTable(); 
+                populated = 0;
+            }
+        }
+
         // populate iocs 
         $.getJSON($SCRIPT_ROOT + "/_populate_iocs",
                   function (data) {
@@ -293,8 +304,7 @@
                               loadDataTable();
                           }
                       }).multiselectfilter();
-                      $('.ui-multiselect').css('width', '165px');
-                  });
+                  }).complete(populate_complete);
         // populate hosts
         $.getJSON($SCRIPT_ROOT + "/_populate_hosts",
                   function (data) {
@@ -312,8 +322,7 @@
                               loadDataTable();
                           }
                       }).multiselectfilter();
-                      $('.ui-multiselect').css('width', '165px');
-                  });
+                  }).complete(populate_complete);
         // populate categories
         $.getJSON($SCRIPT_ROOT + "/_populate_categories",
                   function (data) {
@@ -331,8 +340,7 @@
                               loadDataTable();
                           }
                       }).multiselectfilter();
-                      $('.ui-multiselect').css('width', '165px');
-                  });
+                  }).complete(populate_complete);
         // populate severities
         $.getJSON($SCRIPT_ROOT + "/_populate_severities",
                   function (data) {
@@ -350,8 +358,7 @@
                               loadDataTable();
                           }
                       }).multiselectfilter();
-                      $('.ui-multiselect').css('width', '165px');
-                  });
+                  }).complete(populate_complete);
         // populate confidences
         $.getJSON($SCRIPT_ROOT + "/_populate_confidences",
                   function (data) {
@@ -369,8 +376,8 @@
                               loadDataTable();
                           }
                       }).multiselectfilter();
-                      $('.ui-multiselect').css('width', '165px');
-                  });
+                  }).complete(populate_complete);
+
 
         // expand row logic
         var anOpen = []; // expanded rows
@@ -404,7 +411,11 @@
                 var header = '<thead><tr><th>Host</th><th>Execution time</th><th>Md5hash</th><th>Link</th></tr></thead>'
             }
             $.getJSON($SCRIPT_ROOT + details_url,
-                      {'keyId': primary},
+                    {'keyId': primary,
+                     'iocs' : params.iocs.join(','),
+                     'hosts': params.hosts.join(','),
+                     'sevs' : params.severities.join(','),
+                     'exec_date': params.exec_date},
                       function (data) {
                           var items = []
                           $.each(data.details, function(ind, row) {
