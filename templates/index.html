@@ -23,7 +23,7 @@
         display: none;
     }
     td.details {
-        border: 0; 
+        border: 1; 
         padding: 0;
         background-color: #ccc; 
     }
@@ -386,9 +386,7 @@
                 var i = $.inArray( nTr, anOpen );
                 if ( i === -1 ) {
                     $('i', this).attr( 'class', "icon-minus-sign" );
-                    //var out = fnFormatDetails(nTr);
                     fnFormatDetails(nTr);
-                    //Table.fnOpen( nTr, out, 'details' );
                     anOpen.push( nTr );
                 }
                 else {

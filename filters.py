@@ -18,7 +18,7 @@ def filter_hosts(query, hosts):
     if query == None or is_null(hosts):
         return None
     vals = [int(v) for v in hosts.split(',')]
-    return query.filter(host_guid.host_guid.in_(vals))
+    return query.filter(host_binary.host_guid.in_(vals))
 
 def filter_iocs(query, iocs):
     if query == None or is_null(iocs):

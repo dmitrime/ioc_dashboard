@@ -11,7 +11,7 @@ def get_iocs():
     sum_by = request.args.get('sSumBy', 'severity')
 
     if sum_by == 'host_count':
-        query = db.session.query(tg_ioc.title, func.count(host_binary.host_guid).label('sum'), tg_ioc.id). \
+        query = db.session.query(tg_ioc.title, func.count(host_binary.md5hash).label('sum'), tg_ioc.id). \
                 join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
     elif sum_by == 'severity':
         query = db.session.query(tg_ioc.title, tg_ioc.severity.label('sum'), tg_ioc.id). \
@@ -24,7 +24,7 @@ def get_host_binaries():
     sum_by = request.args.get('sSumBy', 'severity')
 
     if sum_by == 'ioc_count':
-        query = db.session.query(host_guid.host_name, func.count(tg_ioc.id).label('sum'), host_binary.host_guid). \
+        query = db.session.query(host_guid.host_name, func.count(host_binary.md5hash).label('sum'), host_binary.host_guid). \
                 join(host_binary).join(host_ioc).join(tg_ioc).group_by(host_binary.host_guid).order_by(order)
     elif sum_by == 'severity':
         query = db.session.query(host_guid.host_name, func.sum(tg_ioc.severity).label('sum'), host_binary.host_guid). \
