@@ -74,8 +74,11 @@ def process_date(results, ind):
 @app.route('/_get_ioc_details')
 def get_ioc_details():
     keyId = request.args.get('keyId', 0)
-    hosts = request.args.get('hosts', '')
-    exec_date = request.args.get('exec_date', '')
+    hosts = request.args.get('sHosts', '')
+    exec_date = request.args.get('sExecDate', '')
+    catg_list = request.args.get('sCategories', '')
+    sevr_list = request.args.get('sSeverities', '')
+    conf_list = request.args.get('sConfidences', '')
 
     query = db.session.query(host_guid.host_name, host_binary.execution_time, host_binary.md5hash, tg_binary.tg_id). \
             join(host_binary).join(tg_binary).join(host_ioc).join(tg_ioc).filter(tg_ioc.id==keyId)
@@ -83,11 +86,22 @@ def get_ioc_details():
     query = filters.filter_hosts(query, hosts)
   
     print "\n", query, "\n", keyId
-    rows = []
+    rows, count = [], 0
     if query != None:
-        rows = [list(r) for r in query.all()]
+        count = query.count()
+
+        start = int(request.args.get('iDisplayStart', 0))
+        limit = int(request.args.get('iDisplayLength', 10))
+
+        results = query.limit(limit).offset(start).all()
+        rows = [list(r) for r in results]
         rows = process_date(rows, 1)
-    return jsonify({'details':rows})
+
+    d = {   'sEcho':request.args.get('sEcho',0),
+            'iTotalRecords':count, 
+            'iTotalDisplayRecords':count,
+            'aaData':rows}
+    return jsonify(d)
 
 @app.route('/_get_host_details')
 def get_host_details():
@@ -105,9 +119,20 @@ def get_host_details():
     print "\n", query, "\n", keyId
     rows = []
     if query != None:
-        rows = [list(r) for r in query.all()]
+        count = query.count()
+
+        start = int(request.args.get('iDisplayStart', 0))
+        limit = int(request.args.get('iDisplayLength', 10))
+        results = query.limit(limit).offset(start).all()
+
+        rows = [list(r) for r in results]
         rows = process_date(rows, 1)
-    return jsonify({'details':rows})
+
+    d = {   'sEcho':request.args.get('sEcho',0),
+            'iTotalRecords':count,
+            'iTotalDisplayRecords':count,
+            'aaData':rows}
+    return jsonify(d)
 
 @app.route('/_populate_iocs')
 def populate_iocs():

@@ -3,7 +3,7 @@ from sqlalchemy import or_
 import datetime
 
 def is_null(var):
-    return var == 'null'
+    return var == '' or var == 'null'
 
 def filter_date(query, exec_date):
     if exec_date:
