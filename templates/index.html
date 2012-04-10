@@ -442,7 +442,7 @@
                         //"bDestroy": true,
                         //"bRetrieve": true,
                         "bAutoWidth": false,
-                        "aaSorting": [[ 0, "desc" ]],
+                        "aaSorting": [[ 0, "asc" ]],
                         "sDom": "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>",
                         "aoColumns": [null, {"bSortable": false}, {"bSortable": false}, {"bSortable": false}],
                         "sAjaxSource": ajax_source,
@@ -454,7 +454,7 @@
                             aoData.push( { "name" : "sCategories", "value" : params.categories } );
                             aoData.push( { "name" : "sSeverities", "value" : params.severities } );
                             aoData.push( { "name" : "sConfidences", "value" : params.confidences } );
-                        },
+                        }
                         //"fnServerData": function ( sSource, aoData, fnCallback ) {
                         //    aoData.push( { "name": "more_data", "value": "my_value" } );
                         //    $.getJSON( sSource, aoData, function (json) { 
@@ -463,7 +463,6 @@
                         //    } );
                         //},
                         //"fnDrawCallback" : function() {
-                        //    alert("aaaaaaaaaaa");
                         //}
             });
         }

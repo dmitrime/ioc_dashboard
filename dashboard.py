@@ -92,8 +92,9 @@ def get_ioc_details():
 
         start = int(request.args.get('iDisplayStart', 0))
         limit = int(request.args.get('iDisplayLength', 10))
+        order = 'host_guid.host_name ' + request.args.get('sSortDir_0', 'desc')
 
-        results = query.limit(limit).offset(start).all()
+        results = query.order_by(order).limit(limit).offset(start).all()
         rows = [list(r) for r in results]
         rows = process_date(rows, 1)
 
@@ -106,24 +107,29 @@ def get_ioc_details():
 @app.route('/_get_host_details')
 def get_host_details():
     keyId = request.args.get('keyId', 0)
-    iocs = request.args.get('iocs', '')
-    sevs = request.args.get('sevs', '')
-    exec_date = request.args.get('exec_date', '')
+    iocs = request.args.get('sIocs', '')
+    exec_date = request.args.get('sExecDate', '')
+    catg_list = request.args.get('sCategories', '')
+    sevr_list = request.args.get('sSeverities', '')
+    conf_list = request.args.get('sConfidences', '')
 
     query = db.session.query(tg_ioc.title, host_binary.execution_time, tg_ioc.severity, tg_binary.tg_id). \
             join(host_ioc).join(host_binary).join(tg_binary).filter(host_binary.host_guid==keyId)
     query = filters.filter_date(query, exec_date)
     query = filters.filter_iocs(query, iocs)
-    query = filters.filter_severities(query, sevs)
+    query = filters.filter_severities(query, sevr_list)
+    query = filters.filter_confidences(query, conf_list)
+    query = filters.filter_categories(query, catg_list)
 
     print "\n", query, "\n", keyId
-    rows = []
+    rows, count = [], 0
     if query != None:
         count = query.count()
 
         start = int(request.args.get('iDisplayStart', 0))
         limit = int(request.args.get('iDisplayLength', 10))
-        results = query.limit(limit).offset(start).all()
+        order = 'tg_ioc.title ' + request.args.get('sSortDir_0', 'desc')
+        results = query.order_by(order).limit(limit).offset(start).all()
 
         rows = [list(r) for r in results]
         rows = process_date(rows, 1)
