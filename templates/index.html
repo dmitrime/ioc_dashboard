@@ -69,8 +69,11 @@
             <div class="span2">
                 <div class="well sidebar-nav">
                     <ul class="nav nav-list">
-                        <li class="nav-header">Execution time</li>
+                        <li class="nav-header">Execution time from</li>
                         <li><input style="width: 90px;" id="exec_date" name="exec_date" maxlength="10" /></li>
+
+                        <li class="nav-header">Execution time until</li>
+                        <li><input style="width: 90px;" id="exec_date2" name="exec_date2" maxlength="10" /></li>
 
                         <li class="nav-header">IOCs</li>
                             <li>
@@ -192,7 +195,7 @@
 
         var Table;
         var ajaxSource = source_iocs;
-        var params = {exec_date: "", iocs: [], hosts: [], categories: [], severities: [], confidences: []}
+        var params = {exec_date: "", exec_date2: "", iocs: [], hosts: [], categories: [], severities: [], confidences: []}
         /* Table initialisation */
         function loadDataTable() {
             Table = $('#tg_results').dataTable( {
@@ -212,6 +215,7 @@
                         "fnServerParams": function ( aoData ) {
                             aoData.push( { "name" : "sSumBy",    "value" : sum_by } );
                             aoData.push( { "name" : "sExecDate", "value" : params.exec_date } );
+                            aoData.push( { "name" : "sExecDate2", "value" : params.exec_date2 } );
                             aoData.push( { "name" : "sIocs",     "value" : params.iocs } );
                             aoData.push( { "name" : "sHosts",    "value" : params.hosts } );
                             aoData.push( { "name" : "sCategories", "value" : params.categories } );
@@ -413,25 +417,6 @@
             var nRow = Table.fnOpen( nTr, out, 'details' );
             $('div.hero-small', nRow).slideDown();
             loadInnerTable(primary, details_url);
-
-            /*$.getJSON($SCRIPT_ROOT + details_url,
-                    {'keyId': primary,
-                     'iocs' : params.iocs.join(','),
-                     'hosts': params.hosts.join(','),
-                     'sevs' : params.severities.join(','),
-                     'exec_date': params.exec_date},
-                      function (data) {
-                          var items = []
-                          $.each(data.details, function(ind, row) {
-                              items.push('<tr><td>'+row[0]+'</td>');
-                              items.push('<td>'+row[1]+'</td>');
-                              items.push('<td>'+row[2]+'</td>');
-                              items.push('<td><a href="https://portal.threatgrid.com/malware_samples/'+row[3]+'" target="_blank">Binary '+row[3]+'</a></td></tr>');
-                          });
-                          var out = '<div class="hero-unit hero-small"><table class="table-bordered" style="background-color: white;">' + header + '<tbody>' + items.join('\n') + '</tbody></table></div>';
-                          var nRow = Table.fnOpen( nTr, out, 'details' );
-                          $('div.hero-small', nRow).slideDown();
-                      });*/
         }
         // dataTables for inner tables
         function loadInnerTable(key_id, ajax_source) {
@@ -449,29 +434,43 @@
                         "fnServerParams": function ( aoData ) {
                             aoData.push( { "name" : "keyId",   "value" : key_id } );
                             aoData.push( { "name" : "sExecDate", "value" : params.exec_date } );
+                            aoData.push( { "name" : "sExecDate2", "value" : params.exec_date2 } );
                             aoData.push( { "name" : "sIocs",     "value" : params.iocs } );
                             aoData.push( { "name" : "sHosts",    "value" : params.hosts } );
                             aoData.push( { "name" : "sCategories", "value" : params.categories } );
                             aoData.push( { "name" : "sSeverities", "value" : params.severities } );
                             aoData.push( { "name" : "sConfidences", "value" : params.confidences } );
+                        },
+                        "fnCreatedRow" : function(nRow, aData, iDataIndex) {
+                            $('td:eq(3)', nRow).html(function() {
+                                return '<a href="https://portal.threatgrid.com/malware_samples/'+$(this).text()+'" target="_blank">Binary '+$(this).text()+'</a>';
+                            });
                         }
-                        //"fnServerData": function ( sSource, aoData, fnCallback ) {
-                        //    aoData.push( { "name": "more_data", "value": "my_value" } );
-                        //    $.getJSON( sSource, aoData, function (json) { 
-                        //        //alert(dump(aoData));
-                        //        fnCallback(json)
-                        //    } );
-                        //},
-                        //"fnDrawCallback" : function() {
-                        //}
             });
         }
         // init datepicker
-        $("#exec_date").datepicker({ maxDate: "+0D" });
+        var dates = $("#exec_date, #exec_date2").datepicker({
+                        maxDate: "+0D",
+                        onSelect: function( selectedDate ) {
+                            var option = this.id == "exec_date" ? "minDate" : "maxDate",
+                                instance = $( this ).data( "datepicker" ),
+                                date = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+                            dates.not( this ).datepicker( "option", option, date );
+                        },
+                        onClose: function () {
+                            if (this.id == "exec_date")  {
+                                params.exec_date = $(this).val(); 
+                            }
+                            else {
+                                params.exec_date2 = $(this).val(); 
+                            }
+                            Table.fnDraw();
+                        }
+        });
         $("#exec_date").change(function () {
-                params.exec_date = $(this).val(); 
-                Table.fnDraw();
-                });
+        });
+        $("#exec_date2").change(function () {
+        });
     } );
 </script>
 </body>

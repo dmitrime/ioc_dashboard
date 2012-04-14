@@ -34,6 +34,7 @@ def get_host_binaries():
 def get_datatable_items(query):
     # filtering 
     exec_date = request.args.get('sExecDate', '')
+    exec_date2 = request.args.get('sExecDate2', '')
     ioc_list  = request.args.get('sIocs', '')
     host_list = request.args.get('sHosts', '')
     catg_list = request.args.get('sCategories', '')
@@ -42,7 +43,7 @@ def get_datatable_items(query):
 
     # record count before filtering and after
     count = query.count()
-    query = filters.filter_all(query, exec_date, ioc_list, host_list, catg_list, sevr_list, conf_list)
+    query = filters.filter_all(query, exec_date, exec_date2, ioc_list, host_list, catg_list, sevr_list, conf_list)
     print query
 
     results = []
@@ -76,13 +77,15 @@ def get_ioc_details():
     keyId = request.args.get('keyId', 0)
     hosts = request.args.get('sHosts', '')
     exec_date = request.args.get('sExecDate', '')
+    exec_date2 = request.args.get('sExecDate2', '')
     catg_list = request.args.get('sCategories', '')
     sevr_list = request.args.get('sSeverities', '')
     conf_list = request.args.get('sConfidences', '')
 
     query = db.session.query(host_guid.host_name, host_binary.execution_time, host_binary.md5hash, tg_binary.tg_id). \
             join(host_binary).join(tg_binary).join(host_ioc).join(tg_ioc).filter(tg_ioc.id==keyId)
-    query = filters.filter_date(query, exec_date)
+    query = filters.filter_date(query, exec_date, True)
+    query = filters.filter_date(query, exec_date2, False)
     query = filters.filter_hosts(query, hosts)
   
     print "\n", query, "\n", keyId
@@ -109,13 +112,15 @@ def get_host_details():
     keyId = request.args.get('keyId', 0)
     iocs = request.args.get('sIocs', '')
     exec_date = request.args.get('sExecDate', '')
+    exec_date2 = request.args.get('sExecDate2', '')
     catg_list = request.args.get('sCategories', '')
     sevr_list = request.args.get('sSeverities', '')
     conf_list = request.args.get('sConfidences', '')
 
     query = db.session.query(tg_ioc.title, host_binary.execution_time, tg_ioc.severity, tg_binary.tg_id). \
             join(host_ioc).join(host_binary).join(tg_binary).filter(host_binary.host_guid==keyId)
-    query = filters.filter_date(query, exec_date)
+    query = filters.filter_date(query, exec_date, True)
+    query = filters.filter_date(query, exec_date2, False)
     query = filters.filter_iocs(query, iocs)
     query = filters.filter_severities(query, sevr_list)
     query = filters.filter_confidences(query, conf_list)

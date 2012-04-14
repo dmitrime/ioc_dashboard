@@ -5,11 +5,14 @@ import datetime
 def is_null(var):
     return var == '' or var == 'null'
 
-def filter_date(query, exec_date):
+def filter_date(query, exec_date, after):
     if exec_date:
         try:
             dt = datetime.datetime.strptime(exec_date, '%m/%d/%Y')
-            query = query.filter(host_binary.execution_time >= dt)
+            if after:
+                query = query.filter(host_binary.execution_time >= dt)
+            else:
+                query = query.filter(host_binary.execution_time <= (dt+datetime.timedelta(days=1))) # make this inclusive
         except ValueError:
             pass
     return query
@@ -48,8 +51,9 @@ def filter_confidences(query, confs):
 Returns None when all checkboxes are unchecked for some filter,
 otherwise the filtered query.
 '''
-def filter_all(query, exec_date, iocs, hosts, categs, sevs, confs):
-    query = filter_date(query, exec_date)
+def filter_all(query, exec_date, exec_date2, iocs, hosts, categs, sevs, confs):
+    query = filter_date(query, exec_date, True)
+    query = filter_date(query, exec_date2, False)
     query = filter_iocs(query, iocs)
     query = filter_hosts(query, hosts)
     query = filter_categories(query, categs)
