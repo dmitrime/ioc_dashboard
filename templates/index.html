@@ -122,9 +122,6 @@
                     <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="tg_results">
                         <thead>
                             <tr>
-                                <th width="8%"></th>
-                                <th width="75%" id="column1">Title</th>
-                                <th width="17%">Sum</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -155,31 +152,6 @@
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
 <script type="text/javascript" charset="utf-8">
-    function dump(arr,level) {
-        var dumped_text = "";
-        if(!level) level = 0;
-
-        //The padding given at the beginning of the line.
-        var level_padding = "";
-        for(var j=0;j<level+1;j++) level_padding += "    ";
-
-        if(typeof(arr) == 'object') { //Array/Hashes/Objects 
-            for(var item in arr) {
-                var value = arr[item];
-
-                if(typeof(value) == 'object') { //If it is an array,
-                    dumped_text += level_padding + "'" + item + "' ...\n";
-                    dumped_text += dump(value,level+1);
-                } else {
-                    dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
-                }
-            }
-        } else { //Stings/Chars/Numbers etc.
-            dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
-        }
-        return dumped_text;
-    }
-
     /* Global vars */
     var SEVERITY = 'severity';
     var IOC_COUNT = 'ioc_count';
@@ -192,22 +164,38 @@
     $(function() {
         var group_by = 'ioc';
         var sum_by = SEVERITY;
-
         var Table;
         var ajaxSource = source_iocs;
         var params = {exec_date: "", exec_date2: "", iocs: [], hosts: [], categories: [], severities: [], confidences: []}
         /* Table initialisation */
         function loadDataTable() {
+            if (group_by == 'ioc') {
+                $('#tg_results thead tr').html('<th width="8%"></th> <th width="50%">Title</th> <th width="auto">Categories</th> <th width="12%">Severity</th> <th width="15%">Confidence</th> <th width="10%">Sum</th>');
+                var columnDefs = [{ "mDataProp": null, "bSortable": false, "sClass": "control center", 
+                                   "sDefaultContent": '<div style="text-align: center;"><i class="icon-plus-sign"></i></div>', "aTargets": [ 0 ]},
+                                 { "mDataProp": 0, "bSortable": false, "aTargets": [ 1 ] },
+                                 { "mDataProp": 1, "aTargets": [ 2 ] },
+                                 { "mDataProp": 2, "aTargets": [ 3 ] },
+                                 { "mDataProp": 3, "aTargets": [ 4 ] },
+                                 { "mDataProp": 4, "aTargets": [ 5 ] }];
+                var sorting = 5;
+            }
+            else {
+                $('#tg_results thead tr').html('<th width="8%"></th> <th width="75%">Host</th> <th width="17%">Sum</th>');
+                var columnDefs = [{ "mDataProp": null, "bSortable": false, "sClass": "control center", 
+                                    "sDefaultContent": '<div style="text-align: center;"><i class="icon-plus-sign"></i></div>', "aTargets": [ 0 ]},
+                                  { "mDataProp": 0, "bSortable": false, "aTargets": [ 1 ] },
+                                  { "mDataProp": 1, "aTargets": [ 2 ] }];
+                var sorting = 2;
+            }
+
             Table = $('#tg_results').dataTable( {
                         "bProcessing": true,
                         "bServerSide": true,
                         "bDestroy": true,
                         "bAutoWidth": false,
-                        "aoColumnDefs": [{ "mDataProp": null, "bSortable": false, "sClass": "control center", 
-                                           "sDefaultContent": '<div style="text-align: center;"><i class="icon-plus-sign"></i></div>', "aTargets": [ 0 ]},
-                                         { "mDataProp": 0, "bSortable": false, "aTargets": [ 1 ] },
-                                         { "mDataProp": 1, "aTargets": [ 2 ] }],
-                        "aaSorting": [[ 2, "desc" ]],
+                        "aoColumnDefs": columnDefs,
+                        "aaSorting": [[ sorting, "desc" ]],
                         "sAjaxSource": ajaxSource,
                         "sDom": "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>",
                         "sPaginationType": "bootstrap",
@@ -233,7 +221,6 @@
               }
               $(this).addClass('btn-primary disabled');
               $('#host-btn').removeClass('btn-primary disabled');
-              $('#column1').text('Title');
               ajaxSource = source_iocs;
               loadDataTable();
         });
@@ -244,7 +231,6 @@
               }
               $(this).addClass('btn-primary disabled');
               $('#ioc-btn').removeClass('btn-primary disabled');
-              $('#column1').text('Host');
               ajaxSource = source_hosts;
               loadDataTable();
         });
@@ -405,11 +391,12 @@
         {
             var details_url = '/_get_' + group_by + '_details';
             var oData = Table.fnGetData(nTr);
-            var primary = oData[2];
             if (group_by == 'host') {
                 var header = '<thead><tr><th>Title</th><th>Execution time</th><th>Severity</th><th>Link</th></tr></thead>'
+                var primary = oData[2];
             } else if (group_by == 'ioc') {
                 var header = '<thead><tr><th>Host</th><th>Execution time</th><th>Md5hash</th><th>Link</th></tr></thead>'
+                var primary = oData[5];
             }
             var out = '<div class="hero-unit hero-small"><table class="table table-striped table-bordered" id="inner_results'+primary+'" style="background-color: white;">' + 
                       header + '<tbody><tr><td colspan="4" class="dataTables_empty">Loading data from server</td></tr></tbody></table></div>';

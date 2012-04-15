@@ -7,20 +7,20 @@ import time
 
 @app.route('/_get_iocs')
 def get_iocs():
-    order = 'sum ' + request.args.get('sSortDir_0', 'desc')
+    order = "%d %s" % (int(request.args.get('iSortCol_0', '5')), request.args.get('sSortDir_0', 'desc'))
     sum_by = request.args.get('sSumBy', 'severity')
 
     if sum_by == 'host_count':
-        query = db.session.query(tg_ioc.title, func.count(host_binary.md5hash).label('sum'), tg_ioc.id). \
+        query = db.session.query(tg_ioc.title, tg_ioc.categories, tg_ioc.severity, tg_ioc.confidence, func.count(host_binary.md5hash).label('sum'), tg_ioc.id). \
                 join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
     elif sum_by == 'severity':
-        query = db.session.query(tg_ioc.title, tg_ioc.severity.label('sum'), tg_ioc.id). \
+        query = db.session.query(tg_ioc.title, tg_ioc.categories, tg_ioc.severity, tg_ioc.confidence, tg_ioc.severity.label('sum'), tg_ioc.id). \
                 join(host_ioc).join(host_binary).group_by(tg_ioc.id).order_by(order)
     return get_datatable_items(query)
 
 @app.route('/_get_host_binaries')
 def get_host_binaries():
-    order = 'sum ' + request.args.get('sSortDir_0', 'desc')
+    order = "%d %s" % (int(request.args.get('iSortCol_0', '2')), request.args.get('sSortDir_0', 'desc'))
     sum_by = request.args.get('sSumBy', 'severity')
 
     if sum_by == 'ioc_count':
@@ -189,5 +189,5 @@ def hello():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 
