@@ -104,6 +104,22 @@
                             <select title="Confidence" name="confidence" id="confidences-list" multiple="multiple">
                             </select>
                             </li>
+
+                        <hr></hr>
+
+                        <li class="nav-header">Save Filter</li>
+                            <li>
+                            <div class="form-inline">
+                                <input type="text" class="input-small" placeholder="Filter name">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                            </li>
+
+                        <li class="nav-header">Load Filter</li>
+                            <li>
+                            <select title="LoadFilter" name="loadfilters" id="filters-list">
+                            </select>
+                            </li>
                     </ul>
                 </div><!--/.well -->
             </div><!--/span-->
@@ -173,7 +189,7 @@
                 $('#tg_results thead tr').html('<th width="8%"></th> <th width="50%">Title</th> <th width="auto">Categories</th> <th width="12%">Severity</th> <th width="15%">Confidence</th> <th width="10%">Sum</th>');
                 var columnDefs = [{ "mDataProp": null, "bSortable": false, "sClass": "control center", 
                                    "sDefaultContent": '<div style="text-align: center;"><i class="icon-plus-sign"></i></div>', "aTargets": [ 0 ]},
-                                 { "mDataProp": 0, "bSortable": false, "aTargets": [ 1 ] },
+                                 { "mDataProp": 0, "aTargets": [ 1 ] },
                                  { "mDataProp": 1, "aTargets": [ 2 ] },
                                  { "mDataProp": 2, "aTargets": [ 3 ] },
                                  { "mDataProp": 3, "aTargets": [ 4 ] },
@@ -184,7 +200,7 @@
                 $('#tg_results thead tr').html('<th width="8%"></th> <th width="75%">Host</th> <th width="17%">Sum</th>');
                 var columnDefs = [{ "mDataProp": null, "bSortable": false, "sClass": "control center", 
                                     "sDefaultContent": '<div style="text-align: center;"><i class="icon-plus-sign"></i></div>', "aTargets": [ 0 ]},
-                                  { "mDataProp": 0, "bSortable": false, "aTargets": [ 1 ] },
+                                  { "mDataProp": 0, "aTargets": [ 1 ] },
                                   { "mDataProp": 1, "aTargets": [ 2 ] }];
                 var sorting = 2;
             }
@@ -367,6 +383,11 @@
                       }).multiselectfilter();
                   }).complete(populate_complete);
 
+          $("select[name=loadfilters]").multiselect({
+              noneSelectedText: "Select Filter",
+              close: function () {
+              }
+          }).multiselectfilter();
 
         // expand row logic
         var anOpen = []; // expanded rows
@@ -416,7 +437,7 @@
                         "bAutoWidth": false,
                         "aaSorting": [[ 0, "asc" ]],
                         "sDom": "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>",
-                        "aoColumns": [null, {"bSortable": false}, {"bSortable": false}, {"bSortable": false}],
+                        //"aoColumns": [null, {"bSortable": false}, {"bSortable": false}, {"bSortable": false}],
                         "sAjaxSource": ajax_source,
                         "fnServerParams": function ( aoData ) {
                             aoData.push( { "name" : "keyId",   "value" : key_id } );

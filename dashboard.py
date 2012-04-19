@@ -88,16 +88,18 @@ def get_ioc_details():
     query = filters.filter_date(query, exec_date2, False)
     query = filters.filter_hosts(query, hosts)
   
-    print "\n", query, "\n", keyId
     rows, count = [], 0
     if query != None:
         count = query.count()
 
         start = int(request.args.get('iDisplayStart', 0))
         limit = int(request.args.get('iDisplayLength', 10))
-        order = 'host_guid.host_name ' + request.args.get('sSortDir_0', 'desc')
+        order = "%d %s" % (int(request.args.get('iSortCol_0', '0'))+1, request.args.get('sSortDir_0', 'desc'))
+        query = query.order_by(order).limit(limit).offset(start)
 
-        results = query.order_by(order).limit(limit).offset(start).all()
+        print "\n", query, "\n", keyId
+
+        results = query.all()
         rows = [list(r) for r in results]
         rows = process_date(rows, 1)
 
@@ -126,15 +128,18 @@ def get_host_details():
     query = filters.filter_confidences(query, conf_list)
     query = filters.filter_categories(query, catg_list)
 
-    print "\n", query, "\n", keyId
     rows, count = [], 0
     if query != None:
         count = query.count()
 
         start = int(request.args.get('iDisplayStart', 0))
         limit = int(request.args.get('iDisplayLength', 10))
-        order = 'tg_ioc.title ' + request.args.get('sSortDir_0', 'desc')
-        results = query.order_by(order).limit(limit).offset(start).all()
+        order = "%d %s" % (int(request.args.get('iSortCol_0', '0'))+1, request.args.get('sSortDir_0', 'desc'))
+        query = query.order_by(order).limit(limit).offset(start)
+
+        print "\n", query, "\n", keyId
+
+        results = query.all()
 
         rows = [list(r) for r in results]
         rows = process_date(rows, 1)
@@ -189,5 +194,5 @@ def hello():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 
