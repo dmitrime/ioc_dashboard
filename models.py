@@ -53,3 +53,15 @@ class tg_ioc(db.Model):
     def __repr__(self):
         return "tg_ioc: <%d>" % self.id
 
+class dashboard_filters(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text)
+    params = db.Column(db.Text)
+
+    def __init__(self, name, params):
+        self.name = name
+        self.params = params
+
+    def __repr__(self):
+        return "dashboard_filters: <%d, %s>" % (self.id, self.name)
+

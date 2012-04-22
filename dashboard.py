@@ -1,5 +1,5 @@
 from flask import render_template, request, jsonify
-from models import app, db, tg_ioc, host_binary, host_ioc, tg_binary, host_guid
+from models import app, db, tg_ioc, host_binary, host_ioc, tg_binary, host_guid, dashboard_filters
 import filters 
 from sqlalchemy import func
 import datetime
@@ -189,10 +189,25 @@ def populate_confidences():
     results = db.session.query(tg_ioc.confidence).distinct().order_by(tg_ioc.confidence).all()
     return jsonify({'confidences': [list(r) for r in results]})
 
+@app.route('/_populate_filters')
+def populate_filters():
+    results = db.session.query(dashboard_filters.id, dashboard_filters.name, dashboard_filters.params).order_by(dashboard_filters.name).all()
+    return jsonify({'filters': [list(r) for r in results]})
+
+@app.route('/_save_filter')
+def save_filter():
+    filtername = request.args.get('filtername', '')
+    params = request.args.get('params', '')
+    if filtername != '' and params != '':
+        rec = dashboard_filters(filtername, params)
+        db.session.add(rec)
+        db.session.commit()
+    return jsonify({})
+
 @app.route('/')
 def hello():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 

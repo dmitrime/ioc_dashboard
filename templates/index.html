@@ -5,6 +5,11 @@
 <title>Data tables</title>
  
 <link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap.min.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-responsive.min.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-datatables.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/flick/jquery-ui-1.8.18.custom.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/jquery.multiselect.css") }} />
+<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/jquery.multiselect.filter.css") }} />
 <style type="text/css">
     body {
         padding-top: 60px;
@@ -38,11 +43,6 @@
         float: right;
     }
 </style>
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-responsive.min.css") }} />
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/bootstrap-datatables.css") }} />
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/flick/jquery-ui-1.8.18.custom.css") }} />
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/jquery.multiselect.css") }} />
-<link rel="stylesheet" type="text/css" media="screen" href={{url_for('static', filename="css/jquery.multiselect.filter.css") }} />
 </head>
 
 <body>
@@ -77,31 +77,31 @@
 
                         <li class="nav-header">IOCs</li>
                             <li>
-                                <select title="IOCs" name="iocs" id="iocs-list" multiple="multiple">
+                                <select style="width:165px" title="IOCs" name="iocs" id="iocs-list" multiple="multiple">
                                 </select>
                             </li>
 
                         <li class="nav-header">Hosts</li>
                             <li>
-                                <select title="Hosts" name="hosts" id="hosts-list" multiple="multiple">
+                                <select style="width:165px" title="Hosts" name="hosts" id="hosts-list" multiple="multiple">
                                 </select>
                             </li>
 
                         <li class="nav-header">Category</li>
                             <li>
-                                <select title="Category" name="category" id="categories-list" multiple="multiple">
+                                <select style="width:165px" title="Category" name="category" id="categories-list" multiple="multiple">
                                 </select>
                             </li>
 
                         <li class="nav-header">Severity</li>
                             <li>
-                            <select title="Severity" name="severity" id="severities-list" multiple="multiple">
+                            <select style="width:165px" title="Severity" name="severity" id="severities-list" multiple="multiple">
                             </select>
                             </li>
 
                         <li class="nav-header">Confidence</li>
                             <li>
-                            <select title="Confidence" name="confidence" id="confidences-list" multiple="multiple">
+                            <select style="width:165px" title="Confidence" name="confidence" id="confidences-list" multiple="multiple">
                             </select>
                             </li>
 
@@ -110,14 +110,15 @@
                         <li class="nav-header">Save Filter</li>
                             <li>
                             <div class="form-inline">
-                                <input type="text" class="input-small" placeholder="Filter name">
-                                <button type="submit" class="btn btn-primary">Save</button>
+                                <input type="text" id="filtername" class="input-small" placeholder="Filter name">
+                                <button type="submit" id="save-btn" class="btn btn-primary disabled">Save</button>
                             </div>
                             </li>
 
                         <li class="nav-header">Load Filter</li>
                             <li>
-                            <select title="LoadFilter" name="loadfilters" id="filters-list">
+                            <select style="width:165px" title="LoadFilter" name="loadfilters" id="filters-list">
+                                <option value="0" selected="selected">&nbsp;</option>
                             </select>
                             </li>
                     </ul>
@@ -281,14 +282,15 @@
 
         // populated filter counter
         var populated = 0;
+        var all_filters = {};
         // Load the main table when all filters have been populated
         function populate_complete() {
             populated += 1;
             if (populated == 5)
             {
-                $('.ui-multiselect').css('width', '165px');
                 loadDataTable(); 
                 populated = 0;
+                all_filters[0] = JSON.stringify(params);
             }
         }
 
@@ -298,14 +300,15 @@
                       var items = []
                       $.each(data.iocs, function(ind, row) {
                           items.push('<option value="' + row[1] + '" selected="selected">' + row[0] + '</option>');
-                          params.iocs.push(row[1]);
+                          params.iocs.push(row[1]+'');
                           });
                       $(items.join('\n')).appendTo('ul #iocs-list');
-                      $("select[name=iocs]").multiselect({
+                      $("#iocs-list").multiselect({
+                          minWidth: "165px",
                           noneSelectedText: "Select IOC",
                           close: function () {
                               var vals = $(this).val();
-                              params.iocs = vals;
+                              params.iocs = vals ? vals : [];
                               Table.fnDraw();
                           }
                       }).multiselectfilter();
@@ -316,14 +319,15 @@
                       var items = []
                       $.each(data.hosts, function(ind, row) {
                           items.push('<option value="' + row[1] + '" selected="selected">' + row[0] + '</option>');
-                          params.hosts.push(row[1]);
+                          params.hosts.push(row[1]+'');
                           });
                       $(items.join('\n')).appendTo('ul #hosts-list');
-                      $("select[name=hosts]").multiselect({
+                      $("#hosts-list").multiselect({
+                          minWidth: "165px",
                           noneSelectedText: "Select Host",
                           close: function () {
                               var vals = $(this).val();
-                              params.hosts = vals;
+                              params.hosts = vals ? vals : [];
                               Table.fnDraw();
                           }
                       }).multiselectfilter();
@@ -337,11 +341,12 @@
                           params.categories.push(row);
                           });
                       $(items.join('\n')).appendTo('ul #categories-list');
-                      $("select[name=category]").multiselect({
+                      $("#categories-list").multiselect({
+                          minWidth: "165px",
                           noneSelectedText: "Select Category",
                           close: function () {
                               var vals = $(this).val();
-                              params.categories = vals;
+                              params.categories = vals ? vals : [];
                               Table.fnDraw();
                           }
                       }).multiselectfilter();
@@ -351,15 +356,16 @@
                   function (data) {
                       var items = []
                       $.each(data.severities, function(ind, row) {
-                          items.push('<option value="' + row + '" selected="selected">' + row + '</option>');
-                          params.severities.push(row);
+                          items.push('<option value="' + row[0] + '" selected="selected">' + row[0] + '</option>');
+                          params.severities.push(row[0]+'');
                           });
                       $(items.join('\n')).appendTo('ul #severities-list');
-                      $("select[name=severity]").multiselect({
+                      $("#severities-list").multiselect({
+                          minWidth: "165px",
                           noneSelectedText: "Select Severity",
                           close: function () {
                               var vals = $(this).val();
-                              params.severities = vals;
+                              params.severities = vals ? vals : [];
                               Table.fnDraw();
                           }
                       }).multiselectfilter();
@@ -369,25 +375,117 @@
                   function (data) {
                       var items = []
                       $.each(data.confidences, function(ind, row) {
-                          items.push('<option value="' + row + '" selected="selected">' + row + '</option>');
-                          params.confidences.push(row);
+                          items.push('<option value="' + row[0] + '" selected="selected">' + row[0] + '</option>');
+                          params.confidences.push(row[0]+'');
                           });
                       $(items.join('\n')).appendTo('ul #confidences-list');
-                      $("select[name=confidence]").multiselect({
+                      $("#confidences-list").multiselect({
+                          minWidth: "165px",
                           noneSelectedText: "Select Confidence",
                           close: function () {
                               var vals = $(this).val();
-                              params.confidences  = vals;
+                              params.confidences  = vals ? vals : [];
                               Table.fnDraw();
                           }
                       }).multiselectfilter();
                   }).complete(populate_complete);
 
-          $("select[name=loadfilters]").multiselect({
-              noneSelectedText: "Select Filter",
-              close: function () {
-              }
-          }).multiselectfilter();
+        // sets the filters' values according to params
+        function update_params() {
+            $("#exec_date").val(params.exec_date);
+            $("#exec_date2").val(params.exec_date2);
+            $("#iocs-list option").each(function(index, option) {
+                  var ind = $(option).val();
+                  if (params.iocs.indexOf(ind) == -1)
+                      $(option).removeAttr("selected");
+                  else
+                      $(option).attr("selected", "selected");
+            });
+            $("#hosts-list option").each(function(index, option) {
+                  var ind = $(option).val();
+                  if (params.hosts.indexOf(ind) == -1)
+                      $(option).removeAttr("selected");
+                  else
+                      $(option).attr("selected", "selected");
+            });
+            $("#categories-list option").each(function(index, option) {
+                  var ind = $(option).val();
+                  if (params.categories.indexOf(ind) == -1)
+                      $(option).removeAttr("selected");
+                  else
+                      $(option).attr("selected", "selected");
+            });
+            $("#severities-list option").each(function(index, option) {
+                  var ind = $(option).val();
+                  if (params.severities.indexOf(ind) == -1)
+                      $(option).removeAttr("selected");
+                  else
+                      $(option).attr("selected", "selected");
+            });
+            $("#confidences-list option").each(function(index, option) {
+                  var ind = $(option).val();
+                  if (params.confidences.indexOf(ind) == -1)
+                      $(option).removeAttr("selected");
+                  else
+                      $(option).attr("selected", "selected");
+            });
+            $("select[multiple='multiple']").multiselect('refresh');
+        }
+
+        // populate filters
+        function populate_filters() {
+            // clear existing items
+            $('#filters-list option').each(function(index, option) {
+                if (index != 0)
+                    $(option).remove();
+            });
+            // get items from server
+            $.getJSON($SCRIPT_ROOT + "/_populate_filters",
+                      function (data) {
+                          var items = []
+                          $.each(data.filters, function(ind, row) {
+                              items.push('<option value="' + row[0] + '">' + row[1] + '</option>');
+                              all_filters[row[0]] = row[2]
+                              });
+                          $(items.join('\n')).appendTo('ul #filters-list');
+                          var el = $("#filters-list").multiselect({
+                              minWidth: "165px",
+                              noneSelectedText: "Select Filter",
+                              header: "Select a filter",
+                              multiple: false,
+                              selectedList: 1,
+                              close: function () {
+                                  var val = $(this).val();
+                                  params = JSON.parse(all_filters[val]);
+                                  update_params();
+                                  Table.fnDraw();
+                              }
+                          });
+                          el.multiselect('refresh');
+                      });
+        }
+        populate_filters();
+
+        // Save filter logic
+        $('input#filtername').keyup(function () {
+                var val = $(this).val();
+                if (!val || /^\s*$/.test(val)) {
+                    $('button#save-btn').addClass('disabled');
+                }
+                else {
+                    $('button#save-btn').removeClass('disabled');
+                }
+                });
+        $('button#save-btn').click(function () {
+                var val = $('input#filtername').val();
+                $.getJSON($SCRIPT_ROOT + "/_save_filter", 
+                    {filtername: val, params: JSON.stringify(params)},
+                    function (data) {
+                        $('input#filtername').val('');
+                        $('button#save-btn').addClass('disabled');
+                        populate_filters();
+                    });
+                });
 
         // expand row logic
         var anOpen = []; // expanded rows
@@ -474,10 +572,6 @@
                             }
                             Table.fnDraw();
                         }
-        });
-        $("#exec_date").change(function () {
-        });
-        $("#exec_date2").change(function () {
         });
     } );
 </script>
