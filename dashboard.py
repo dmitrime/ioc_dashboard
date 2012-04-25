@@ -1,7 +1,7 @@
 from flask import render_template, request, jsonify
 from models import app, db, tg_ioc, host_binary, host_ioc, tg_binary, host_guid, dashboard_filters
 import filters 
-from sqlalchemy import func
+from sqlalchemy import func, delete
 import datetime
 import time
 
@@ -204,10 +204,18 @@ def save_filter():
         db.session.commit()
     return jsonify({})
 
+@app.route('/_remove_filter')
+def remove_filter():
+    filterId = int(request.args.get('filterId', 0))
+    if filterId != 0:
+        d = db.session.query(dashboard_filters).filter(dashboard_filters.id==filterId).delete()
+        db.session.commit()
+    return jsonify({})
+
 @app.route('/')
 def hello():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 

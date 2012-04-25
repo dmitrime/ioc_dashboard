@@ -121,6 +121,9 @@
                                 <option value="0" selected="selected">&nbsp;</option>
                             </select>
                             </li>
+                            <li class="nav-header">Remove Selected Filter</li>
+                                <button type="submit" id="remove-btn" class="btn btn-primary disabled">Remove</button>
+                            <li>
                     </ul>
                 </div><!--/.well -->
             </div><!--/span-->
@@ -435,7 +438,7 @@
         // populate filters
         function populate_filters() {
             // clear existing items
-            $('#filters-list option').each(function(index, option) {
+            $('#filters-list option').each(function(index, option) {
                 if (index != 0)
                     $(option).remove();
             });
@@ -459,6 +462,10 @@
                                   params = JSON.parse(all_filters[val]);
                                   update_params();
                                   Table.fnDraw();
+                                  if (val == '0') 
+                                      $('button#remove-btn').addClass('disabled');
+                                  else
+                                      $('button#remove-btn').removeClass('disabled');
                               }
                           });
                           el.multiselect('refresh');
@@ -486,6 +493,17 @@
                         populate_filters();
                     });
                 });
+        // Remove button 
+        $('button#remove-btn').click(function () {
+                var val = $("#filters-list").val();
+                var that = this;
+                $.getJSON($SCRIPT_ROOT + "/_remove_filter", 
+                    {filterId: val},
+                    function (data) {
+                        populate_filters();
+                        $(that).addClass('disabled');
+                    });
+            });
 
         // expand row logic
         var anOpen = []; // expanded rows
