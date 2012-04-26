@@ -480,8 +480,13 @@
                 $("#filters-list option[value!='0']").each(function() { arr.push($(this).text()); });
                 if (!val || /^\s*$/.test(val) || arr.indexOf(val) != -1) {
                     $('button#save-btn').addClass('disabled');
+                    if (arr.indexOf(val) != -1)
+                        $(this).css({color:'red'});
+                    else
+                        $(this).css({color:'black'});
                 }
                 else {
+                    $(this).css({color:'black'});
                     $('button#save-btn').removeClass('disabled');
                 }
             });
