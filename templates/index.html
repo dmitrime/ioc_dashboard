@@ -478,7 +478,6 @@
                 var val = $(this).val();
                 var arr = [];
                 $("#filters-list option[value!='0']").each(function() { arr.push($(this).text()); });
-                console.log(arr);
                 if (!val || /^\s*$/.test(val) || arr.indexOf(val) != -1) {
                     $('button#save-btn').addClass('disabled');
                 }
