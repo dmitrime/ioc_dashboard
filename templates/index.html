@@ -70,10 +70,10 @@
                 <div class="well sidebar-nav">
                     <ul class="nav nav-list">
                         <li class="nav-header">Execution time from</li>
-                        <li><input style="width: 90px;" id="exec_date" name="exec_date" maxlength="10" /></li>
+                        <li><input style="width: 90px;" id="exec_date" name="exec_date" maxlength="10"></input></li>
 
                         <li class="nav-header">Execution time until</li>
-                        <li><input style="width: 90px;" id="exec_date2" name="exec_date2" maxlength="10" /></li>
+                        <li><input style="width: 90px;" id="exec_date2" name="exec_date2" maxlength="10"></input></li>
 
                         <li class="nav-header">IOCs</li>
                             <li>
@@ -110,7 +110,7 @@
                         <li class="nav-header">Save Filter</li>
                             <li>
                             <div class="form-inline">
-                                <input type="text" id="filtername" class="input-small" placeholder="Filter name">
+                                <input type="text" id="filtername" class="input-small" placeholder="Filter name"></input>
                                 <button type="submit" id="save-btn" class="btn btn-primary disabled">Save</button>
                             </div>
                             </li>
@@ -293,7 +293,7 @@
             {
                 loadDataTable(); 
                 populated = 0;
-                all_filters[0] = JSON.stringify(params);
+                all_filters['0'] = JSON.stringify(params);
             }
         }
 
@@ -433,6 +433,7 @@
                       $(option).attr("selected", "selected");
             });
             $("select[multiple='multiple']").multiselect('refresh');
+            Table.fnDraw();
         }
 
         // populate filters
@@ -461,7 +462,6 @@
                                   var val = $(this).val();
                                   params = JSON.parse(all_filters[val]);
                                   update_params();
-                                  Table.fnDraw();
                                   if (val == '0') 
                                       $('button#remove-btn').addClass('disabled');
                                   else
@@ -476,13 +476,16 @@
         // Save filter logic
         $('input#filtername').keyup(function () {
                 var val = $(this).val();
-                if (!val || /^\s*$/.test(val)) {
+                var arr = [];
+                $("#filters-list option[value!='0']").each(function() { arr.push($(this).text()); });
+                console.log(arr);
+                if (!val || /^\s*$/.test(val) || arr.indexOf(val) != -1) {
                     $('button#save-btn').addClass('disabled');
                 }
                 else {
                     $('button#save-btn').removeClass('disabled');
                 }
-                });
+            });
         $('button#save-btn').click(function () {
                 var val = $('input#filtername').val();
                 $.getJSON($SCRIPT_ROOT + "/_save_filter", 
@@ -500,7 +503,10 @@
                 $.getJSON($SCRIPT_ROOT + "/_remove_filter", 
                     {filterId: val},
                     function (data) {
+                        $("#filters-list").val('0');
                         populate_filters();
+                        params = JSON.parse(all_filters['0']);
+                        update_params();
                         $(that).addClass('disabled');
                     });
             });
@@ -577,8 +583,8 @@
                         maxDate: "+0D",
                         onSelect: function( selectedDate ) {
                             var option = this.id == "exec_date" ? "minDate" : "maxDate",
-                                instance = $( this ).data( "datepicker" ),
-                                date = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+                            instance = $( this ).data( "datepicker" ),
+                            date = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
                             dates.not( this ).datepicker( "option", option, date );
                         },
                         onClose: function () {
@@ -590,7 +596,11 @@
                             }
                             Table.fnDraw();
                         }
-        });
+        }).change(function() {
+                        var option = this.id == "exec_date" ? "minDate" : "maxDate", instance = $( this ).data( "datepicker" );
+                        var date = option == "maxDate" ? "+0D" : null;
+                        dates.not( this ).datepicker( "option", option, date );
+                    });
     } );
 </script>
 </body>
