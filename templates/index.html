@@ -235,24 +235,30 @@
 
         // add group by ioc and host button handlers
         $('#ioc-btn').click(function () {
-              group_by = 'ioc';
-              if (sum_by == IOC_COUNT) {
-                  sum_by = HOST_COUNT;
-              }
-              $(this).addClass('btn-primary disabled');
-              $('#host-btn').removeClass('btn-primary disabled');
-              ajaxSource = source_iocs;
-              loadDataTable();
+            if ($(this).hasClass('disabled') == false)
+            {
+                group_by = 'ioc';
+                if (sum_by == IOC_COUNT) {
+                    sum_by = HOST_COUNT;
+                }
+                $(this).addClass('btn-primary disabled');
+                $('#host-btn').removeClass('btn-primary disabled');
+                ajaxSource = source_iocs;
+                loadDataTable();
+            }
         });
         $('#host-btn').click(function () {
-              group_by = 'host';
-              if (sum_by == HOST_COUNT) {
-                  sum_by = IOC_COUNT;
-              }
-              $(this).addClass('btn-primary disabled');
-              $('#ioc-btn').removeClass('btn-primary disabled');
-              ajaxSource = source_hosts;
-              loadDataTable();
+            if ($(this).hasClass('disabled') == false)
+            {
+                group_by = 'host';
+                if (sum_by == HOST_COUNT) {
+                    sum_by = IOC_COUNT;
+                }
+                $(this).addClass('btn-primary disabled');
+                $('#ioc-btn').removeClass('btn-primary disabled');
+                ajaxSource = source_hosts;
+                loadDataTable();
+            }
         });
 
         // add sum by button handlers
@@ -491,15 +497,18 @@
                 }
             });
         $('button#save-btn').click(function () {
-                var val = $('input#filtername').val();
-                $.getJSON($SCRIPT_ROOT + "/_save_filter", 
-                    {filtername: val, params: JSON.stringify(params)},
-                    function (data) {
-                        $('input#filtername').val('');
-                        $('button#save-btn').addClass('disabled');
-                        populate_filters();
-                    });
-                });
+                if ($(this).hasClass('disabled') == false)
+                {
+                    var val = $('input#filtername').val();
+                    $.getJSON($SCRIPT_ROOT + "/_save_filter", 
+                        {filtername: val, params: JSON.stringify(params)},
+                        function (data) {
+                            $('input#filtername').val('');
+                            $('button#save-btn').addClass('disabled');
+                            populate_filters();
+                        });
+                }
+            });
         // Remove button 
         $('button#remove-btn').click(function () {
                 var val = $("#filters-list").val();
